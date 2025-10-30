@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.cs407.sharedspace.ui.screen.DashboardScreen
 import com.cs407.sharedspace.ui.screen.EnterNameScreen
 import com.cs407.sharedspace.ui.screen.JoinGroupScreen
 import com.cs407.sharedspace.ui.screen.SignInScreen
@@ -50,7 +51,9 @@ fun AppNavigation() {
             )
         }
         composable("dashboard") {
-
+            DashboardScreen(
+                onNavigate = { route -> navController.navigate(route) }
+            )
         }
     }
 }
