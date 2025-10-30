@@ -4,13 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.cs407.sharedspace.ui.screen.SignInScreen
 import com.cs407.sharedspace.ui.theme.SharedSpaceTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +17,30 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SharedSpaceTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                AppNavigation()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun AppNavigation() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController, // Controller that handles navigation
+        startDestination = "sign_in" // First screen to display when app starts
+    ) {
+        composable("sign_in") {
+            SignInScreen(
+                onNavigateToDashboard = { navController.navigate("dashboard") }
+            )
+        }
+        composable("join_group") {
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SharedSpaceTheme {
-        Greeting("Android")
+        }
+        composable("dashboard") {
+
+        }
     }
 }
+
