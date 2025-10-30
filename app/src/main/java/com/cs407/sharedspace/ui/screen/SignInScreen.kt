@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SecureTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,7 +32,8 @@ import com.cs407.sharedspace.R
 
 @Composable
 fun SignInScreen(
-    onNavigateToDashboard: () -> Unit
+    onSignIn: () -> Unit,
+    onRegister: () -> Unit
 ) {
     Surface(
         modifier = Modifier
@@ -45,13 +49,13 @@ fun SignInScreen(
         ) {
             // Main card UI
             // State variables for user inputs
-            var username by remember { mutableStateOf("") }
-            var password by remember { mutableStateOf("") }
+            val username = rememberTextFieldState()
+            val password = rememberTextFieldState()
 
             // Controls visibility of the hint banner
             var showHintBanner by remember { mutableStateOf(false) }
 
-            val context = LocalContext.current
+            //val context = LocalContext.current
 
             // Auto-hide banner after 3 seconds when shown
             if (showHintBanner) {
@@ -69,33 +73,44 @@ fun SignInScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Username input
-                    OutlinedTextField(
-                        value = username,
-                        onValueChange = { username = it },
+                    TextField(
+                        state = username,
                         label = { Text(stringResource(id = R.string.username_label)) },
                         modifier = Modifier.fillMaxWidth(),
                     )
 
+                    Spacer(Modifier.height(8.dp))
+
                     // Password input
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
+                    SecureTextField(
+                        state = password,
                         label = { Text(stringResource(id = R.string.password_label)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        textObfuscationMode = TextObfuscationMode.Hidden,
                     )
 
                     Spacer(Modifier.height(16.dp))
 
                     Button(
-                        onClick = {  },
+                        onClick = {
+                            //TODO: Add sign in logic (Firebase) + send error messages as needed
+                            onSignIn()
+                        },
                     ) {
                         Text(stringResource(id = R.string.sign_in_label))
                     }
 
+                    Spacer(Modifier.height(8.dp))
+
                     Text(text = "or", color = Color.Gray, style = MaterialTheme.typography.bodyLarge)
 
+                    Spacer(Modifier.height(8.dp))
+
                     Button(
-                        onClick = {  },
+                        onClick = {
+                            //TODO: Add registration logic (Firebase) + send error messages as needed
+                            onRegister()
+                        },
                     ) {
                         Text(stringResource(id = R.string.register_label))
                     }

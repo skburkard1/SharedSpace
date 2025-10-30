@@ -4,4 +4,12 @@
     <string name="register_label">Register</string>
     <string name="username_label">Username</string>
     <string name="password_label">Password</string>
+    <string name="create_group_label">Create Group</string>
+    <string name="join_group_label">Join Group</string>
+    <string name="group_id_label">Group Id</string>
+    <string name="welcome">Welcome!</string>
+    <string name="enter_name_label">Please enter your name.</string>
+    <string name="name_label">Name</string>
+    <string name="group_name_label">Group Name</string>
+    <string name="next_button">Next</string>
 </resources>
