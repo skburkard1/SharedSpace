@@ -92,7 +92,7 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Chat Row Section
+        // Chat Row
         Text(
             text = "Chat",
             style = MaterialTheme.typography.titleMedium,
