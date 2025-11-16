@@ -5,9 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.cs407.sharedspace.data.UserViewModel
 import com.cs407.sharedspace.ui.screen.DashboardScreen
 import com.cs407.sharedspace.ui.screen.EnterNameScreen
 import com.cs407.sharedspace.ui.screen.JoinGroupScreen
@@ -29,6 +31,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val viewModel: UserViewModel = viewModel()
+
     NavHost(
         navController = navController, // Controller that handles navigation
         startDestination = "sign_in" // First screen to display when app starts
@@ -36,7 +40,8 @@ fun AppNavigation() {
         composable("sign_in") {
             SignInScreen(
                 onSignIn = { navController.navigate("dashboard")},
-                onRegister = { navController.navigate("enter_name")}
+                onRegister = { navController.navigate("enter_name")},
+                viewModel = viewModel
             )
         }
         composable("join_group") {
