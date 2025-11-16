@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "885391393614",
+    "project_id": "sharedspace-37a0b",
+    "storage_bucket": "sharedspace-37a0b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:885391393614:android:006be936422ea84f31141f",
+        "android_client_info": {
+          "package_name": "com.cs407.sharedspace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDK2B1c8lgoh4ovJm0uvSLfDvBlm0RRM3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
