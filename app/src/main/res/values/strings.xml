@@ -17,4 +17,6 @@
     <string name="short_password">Password is too short</string>
     <string name="empty_email">Email is empty</string>
     <string name="empty_password">Password is empty</string>
+    <string name="transfer_name_lable">Password is empty</string>
+
 </resources>
