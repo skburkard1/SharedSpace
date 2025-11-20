@@ -70,6 +70,10 @@ fun AppNavigation() {
                 onBack = { navController.navigate("dashboard")}
             )
         }
+
+        composable("bill") {
+            BillsScreen()
+        }
     }
 }
 
