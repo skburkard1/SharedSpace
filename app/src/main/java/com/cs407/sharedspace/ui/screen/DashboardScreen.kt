@@ -5,10 +5,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +25,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cs407.sharedspace.R
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.ui.res.stringResource
 
 data class DashboardItem(
     val title: String,
@@ -37,7 +43,8 @@ data class ChatItem(
 
 @Composable
 fun DashboardScreen(
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    onSignOut: () -> Unit
 ) {
     val chatItems = listOf(
         ChatItem("Group", R.drawable.ic_user, "group_chat"),
@@ -58,15 +65,28 @@ fun DashboardScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // App title
-        Text(
-            text = "SharedSpace",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+        Spacer(Modifier.height(32.dp)) // put app name closer in line with other screens
+        Row(
             modifier = Modifier
-                .padding(bottom = 16.dp)
-                .align(Alignment.CenterHorizontally)
-        )
+                .fillMaxWidth()
+                .padding(bottom = 32.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+
+        ) {
+            Spacer(modifier = Modifier.width(24.dp)) // for correct spacing
+            // App title
+            Text(
+                text = stringResource(id = R.string.app_name),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = onSignOut) {
+                Icon(Icons.AutoMirrored.Outlined.Logout,"Sign out")
+            }
+        }
+
+
 
         // Today’s Tasks Widget
         Card(
@@ -189,6 +209,7 @@ fun DashboardScreen(
 @Composable
 fun DashboardScreenComposablePreview() {
     DashboardScreen(
-        onNavigate = {}
+        onNavigate = {},
+        onSignOut = {}
     )
 }

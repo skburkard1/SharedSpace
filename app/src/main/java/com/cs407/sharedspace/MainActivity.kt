@@ -15,6 +15,8 @@ import com.cs407.sharedspace.ui.screen.EnterNameScreen
 import com.cs407.sharedspace.ui.screen.JoinGroupScreen
 import com.cs407.sharedspace.ui.screen.SignInScreen
 import com.cs407.sharedspace.ui.theme.SharedSpaceTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +59,8 @@ fun AppNavigation() {
         }
         composable("dashboard") {
             DashboardScreen(
-                onNavigate = { route -> navController.navigate(route) }
+                onNavigate = { route -> navController.navigate(route) },
+                onSignOut = { Firebase.auth.signOut(); navController.navigate("sign_in")}
             )
         }
     }
