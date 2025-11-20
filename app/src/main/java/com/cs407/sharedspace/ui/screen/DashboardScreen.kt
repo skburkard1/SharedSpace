@@ -82,6 +82,7 @@ fun DashboardScreen(
                 fontWeight = FontWeight.Bold
             )
             IconButton(onClick = onSignOut) {
+                //TODO: Add additional sign out pop up
                 Icon(Icons.AutoMirrored.Outlined.Logout,"Sign out")
             }
         }
