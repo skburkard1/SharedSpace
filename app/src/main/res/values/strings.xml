@@ -17,4 +17,6 @@
     <string name="short_password">Password is too short</string>
     <string name="empty_email">Email is empty</string>
     <string name="empty_password">Password is empty</string>
+    <string name="chore_repeats">Repeats</string>
+    <string name="chore_assigned_to">Assigned to</string>
 </resources>
