@@ -29,15 +29,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cs407.sharedspace.R
+import com.cs407.sharedspace.data.Chore
+import com.cs407.sharedspace.data.ChoreImage
+import com.cs407.sharedspace.data.ChoreRepeats
 
 @Composable
-fun Chore( //TODO: Replace with corresponding fields in Chore Database
-    choreId: Int,
-    choreName: String,
-    choreAssignee: String,
-    choreRepeats: String,
-    choreTicked: Boolean,
-    choreIcon: String,
+fun ChoreCard( //TODO: Replace with corresponding fields in Chore Database
+    chore: Chore,
     onChecked: () -> Unit,
     onEdit: () -> Unit
 ){
@@ -53,18 +51,19 @@ fun Chore( //TODO: Replace with corresponding fields in Chore Database
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 //TODO: Change Image based on Image in Database
-                Image(painterResource(R.drawable.ic_chore), "Chore icon", modifier = Modifier.size(64.dp).padding(4.dp))
+                Image(painterResource(chore.choreImage.id), chore.choreImage.contentDescription, modifier = Modifier.size(64.dp).padding(4.dp))
                 Column(modifier = Modifier) {
-                    Text(choreName, fontWeight = FontWeight.Bold)
-                    Text(stringResource(id = R.string.chore_repeats) + " " + choreRepeats)
-                    Text(stringResource(id = R.string.chore_assigned_to) + " " + choreAssignee)
+                    Text(chore.choreName, fontWeight = FontWeight.Bold)
+                    Text(stringResource(id = R.string.chore_repeats) + " " + chore.choreRepeats.repeatName)
+                    //TODO: Check if choreAssignee id == UserId and change text accordingly
+                    Text(stringResource(id = R.string.chore_assigned_to) + " " + chore.choreAssignee)
                 }
             }
             Row(modifier = Modifier,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
-                    checked = choreTicked,
+                    checked = chore.choreTicked,
                     onCheckedChange = { onChecked }
                 )
                 IconButton(onClick = onEdit) {
@@ -112,8 +111,16 @@ fun ChoreScreen(
         ) {
             item {
                 //TODO: Take chores from Database
-                Chore(32, "Laundry", "John", "weekly",
-                    true, "l", {}, {})
+                ChoreCard(
+                    Chore(
+                        1,
+                        "Laundry",
+                        1,
+                        "John",
+                        ChoreRepeats.TWICE_WEEKLY,
+                        ChoreImage.CLEANING,
+                        true
+                    ), {}, {})
             }
         }
     }
