@@ -43,31 +43,33 @@ fun AppNavigation() {
     ) {
         composable("sign_in") {
             SignInScreen(
-                onSignIn = { navController.navigate("dashboard")},
-                onRegister = { navController.navigate("enter_name")},
+                onSignIn = { navController.navigate("dashboard") },
+                onRegister = { navController.navigate("enter_name") },
                 viewModel = viewModel
             )
         }
         composable("join_group") {
             JoinGroupScreen(
-                onJoinGroup = { navController.navigate("dashboard")},
-                onCreateGroup = { navController.navigate("dashboard")}
+                onJoinGroup = { navController.navigate("dashboard") },
+                onCreateGroup = { navController.navigate("dashboard") }
             )
         }
         composable("enter_name") {
             EnterNameScreen(
-                onEnterName = { navController.navigate("join_group")}
+                onEnterName = { navController.navigate("join_group") },
+                viewModel = viewModel
             )
         }
         composable("dashboard") {
             DashboardScreen(
                 onNavigate = { route -> navController.navigate(route) },
-                onSignOut = { Firebase.auth.signOut(); navController.navigate("sign_in")}
+                onSignOut = { Firebase.auth.signOut(); navController.navigate("sign_in") },
+                viewModel = viewModel
             )
         }
         composable("chore") {
             ChoreScreen(
-                onBack = { navController.navigate("dashboard")}
+                onBack = { navController.navigate("dashboard") }
             )
         }
 

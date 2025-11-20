@@ -21,9 +21,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cs407.sharedspace.R
+import com.cs407.sharedspace.data.UserViewModel
 
 @Composable
 fun EnterNameScreen(
+    viewModel: UserViewModel,
     onEnterName: () -> Unit
 ) {
     Surface(
@@ -42,11 +44,22 @@ fun EnterNameScreen(
             // State variables for user inputs
             val name = rememberTextFieldState()
 
-            Text(text = stringResource(id = R.string.app_name), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineLarge)
+            Text(
+                text = stringResource(id = R.string.app_name),
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge
+            )
             Column {
-                Text(text = stringResource(id = R.string.welcome), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    text = stringResource(id = R.string.welcome),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineSmall
+                )
                 Spacer(Modifier.height(8.dp))
-                Text(text = stringResource(id = R.string.enter_name_label), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = stringResource(id = R.string.enter_name_label),
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 Spacer(Modifier.height(8.dp))
 
                 Column(
@@ -65,8 +78,9 @@ fun EnterNameScreen(
 
                     Button(
                         onClick = {
-                            //TODO: save the name to the account
-                            onEnterName()
+                            viewModel.saveUserName(name.text.toString()) {
+                                onEnterName()
+                            }
                         },
                     ) {
                         Text(stringResource(id = R.string.next_button))
