@@ -105,7 +105,7 @@ fun DashboardScreen(
         }
 
 
-        // Today’s Tasks Widget
+        // Overview Widget
         Card(
             modifier = Modifier
                 .fillMaxWidth()

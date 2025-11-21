@@ -14,6 +14,7 @@ import com.cs407.sharedspace.ui.screen.BillsScreen
 import com.cs407.sharedspace.ui.screen.ChoreScreen
 import com.cs407.sharedspace.ui.screen.DashboardScreen
 import com.cs407.sharedspace.ui.screen.EnterNameScreen
+import com.cs407.sharedspace.ui.screen.GroceryScreen
 import com.cs407.sharedspace.ui.screen.JoinGroupScreen
 import com.cs407.sharedspace.ui.screen.SignInScreen
 import com.cs407.sharedspace.ui.theme.SharedSpaceTheme
@@ -67,12 +68,16 @@ fun AppNavigation() {
                 viewModel = viewModel
             )
         }
+        composable("grocery") {
+            GroceryScreen(
+                onBack = { navController.navigate("dashboard") }
+            )
+        }
         composable("chore") {
             ChoreScreen(
                 onBack = { navController.navigate("dashboard") }
             )
         }
-
         composable("bill") {
             BillsScreen()
         }
