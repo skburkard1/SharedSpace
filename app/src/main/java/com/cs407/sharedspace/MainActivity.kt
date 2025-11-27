@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.cs407.sharedspace.data.GroupListViewModel
 import com.cs407.sharedspace.data.UserViewModel
 import com.cs407.sharedspace.ui.screen.BillsScreen
 import com.cs407.sharedspace.ui.screen.ChoreScreen
@@ -16,6 +17,7 @@ import com.cs407.sharedspace.ui.screen.DashboardScreen
 import com.cs407.sharedspace.ui.screen.EnterNameScreen
 import com.cs407.sharedspace.ui.screen.GroceryScreen
 import com.cs407.sharedspace.ui.screen.JoinGroupScreen
+import com.cs407.sharedspace.ui.screen.MyGroupsScreen
 import com.cs407.sharedspace.ui.screen.SignInScreen
 import com.cs407.sharedspace.ui.theme.SharedSpaceTheme
 import com.google.firebase.Firebase
@@ -80,6 +82,19 @@ fun AppNavigation() {
         }
         composable("bill") {
             BillsScreen()
+        }
+        composable("myGroups") {
+            val userViewModel: UserViewModel = viewModel()
+            val groupListViewModel: GroupListViewModel = viewModel()
+
+
+            MyGroupsScreen(
+                viewModel = userViewModel,
+                groupListViewModel = groupListViewModel,
+                onGroupSelected = { groupId ->
+                    navController.navigate("group_detail/$groupId")
+                }
+            )
         }
     }
 }

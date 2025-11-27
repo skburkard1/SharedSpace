@@ -1,5 +1,9 @@
 package com.cs407.sharedspace.data
 
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
@@ -34,10 +38,49 @@ class UserViewModel : ViewModel() {
             val user = auth.currentUser
             if (user == null) {
                 setUser(UserState())
+            } else {
+                setUser(UserState(uid = user.uid))
             }
         }
     }
+    var userName by mutableStateOf("")
+        private set
 
+    fun loadUserName() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener { doc ->
+                userName = doc.getString("name") ?: ""
+            }
+            .addOnFailureListener {
+                Log.e("Firestore", "Failed to load user name", it)
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Failed to save user name", e)
+            }
+    }
+
+    fun saveUserName(name: String, onComplete: () -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+            ?: return
+
+        val uid = user.uid
+        val db = FirebaseFirestore.getInstance()
+
+        val data = hashMapOf(
+            "name" to name,
+            "email" to user.email
+        )
+
+        db.collection("users")
+            .document(uid)
+            .set(data)
+            .addOnSuccessListener { onComplete() }
+    }
     fun setUser(state: UserState) {
         _userState.update {
             state
@@ -45,6 +88,9 @@ class UserViewModel : ViewModel() {
     }
 }
 
+/**
+ * for creating/joining group
+ */
 class GroupViewModel : ViewModel() {
     private val db: FirebaseFirestore = Firebase.firestore
     private val auth: FirebaseAuth = Firebase.auth
@@ -68,7 +114,10 @@ class GroupViewModel : ViewModel() {
             .addOnSuccessListener {
                 db.collection("users")
                     .document(uid)
-                    .update("groups", com.google.firebase.firestore.FieldValue.arrayUnion(newDoc.id))
+                    .set(
+                        mapOf("groups" to listOf(newDoc.id)),
+                        com.google.firebase.firestore.SetOptions.merge()
+                    )
                 onSuccess(newDoc.id) //creation of new group
             }
             .addOnFailureListener {
@@ -97,10 +146,11 @@ class GroupViewModel : ViewModel() {
 
                 db.collection("users")
                     .document(uid)
-                    .update("groups",  com.google.firebase.firestore.FieldValue.arrayUnion(groupId))
-                        .await()
-
-                onSuccess //successfully added
+                    .set(
+                        mapOf("groups" to listOf(groupId)),
+                        com.google.firebase.firestore.SetOptions.merge()
+                    )                        .await()
+                onSuccess(groupId) //successfully added
             } catch (e: Exception) {
                 onFailure(e)
             }
@@ -108,4 +158,37 @@ class GroupViewModel : ViewModel() {
         }
 
     }
+}
+class GroupListViewModel : ViewModel() {
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = Firebase.auth
+
+    private val _groups = MutableStateFlow<List<Group>>(emptyList())
+    val groups = _groups.asStateFlow()
+
+    fun loadUserGroups() { //get all groupsuser is in
+        val uid = auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            try {
+                val userDoc = db.collection("users").document(uid).get().await()
+                val groupIds = userDoc.get("groups") as? List<String> ?: emptyList()
+                val groupList = mutableListOf<Group>()
+
+                for (id in groupIds) {
+                    val groupDoc = db.collection("groups").document(id).get().await()
+                    if (groupDoc.exists()) {
+                        val name = groupDoc.getString("name") ?: "(Unnamed)"
+                        groupList.add(Group(id, name))
+                    }
+                }
+                _groups.value = groupList
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
+}
+
+
+
+

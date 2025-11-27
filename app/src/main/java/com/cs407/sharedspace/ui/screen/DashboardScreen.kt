@@ -65,10 +65,11 @@ fun DashboardScreen(
     )
 
     val dashboardItems = listOf(
+        DashboardItem("My Groups", R.drawable.ic_user, "myGroups"),
         DashboardItem("Grocery", R.drawable.ic_grocery, "grocery"),
         DashboardItem("Bill", R.drawable.ic_bill, "bill"),
         DashboardItem("Chore", R.drawable.ic_chore, "chore"),
-        DashboardItem("Map", R.drawable.ic_map, "map")
+        DashboardItem("Map", R.drawable.ic_map, "map"),
     )
 
     LaunchedEffect(true) {
@@ -98,10 +99,12 @@ fun DashboardScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
+
             IconButton(onClick = onSignOut) {
                 //TODO: Add additional sign out pop up
                 Icon(Icons.AutoMirrored.Outlined.Logout, "Sign out")
             }
+
         }
 
 
