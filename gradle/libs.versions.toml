@@ -1,6 +1,6 @@
 [versions]
-agp = "8.13.0"
-kotlin = "2.0.21"
+agp = "8.13.1"
+kotlin = "2.2.20"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -11,6 +11,7 @@ composeBom = "2024.09.00"
 navigationCompose = "2.9.4"
 material3 = "1.4.0"
 materialIconsExtended = "1.7.8"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

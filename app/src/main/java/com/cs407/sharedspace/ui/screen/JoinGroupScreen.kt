@@ -28,11 +28,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cs407.sharedspace.R
 
+import android.content.Context
+import android.widget.Toast
+import com.cs407.sharedspace.data.GroupViewModel
+
+fun showToast(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+}
 @Composable
 fun JoinGroupScreen(
     onJoinGroup: () -> Unit,
     onCreateGroup: () -> Unit
 ) {
+    val viewModel = androidx.lifecycle.viewmodel.compose.viewModel<GroupViewModel>()
+    val context = LocalContext.current
     Surface(
         modifier = Modifier
             .fillMaxSize(),
@@ -82,9 +91,23 @@ fun JoinGroupScreen(
 
                     Button(
                         onClick = {
-                            //TODO: Join the group if it exists, otherwise show error
-                            //TODO: may also want to add an additional screen verifying that the group exists
-                            onJoinGroup()
+                            val code : String = groupcode.text.trim() as String
+
+                            if (code.isBlank()) {
+                                showToast(context, "Enter a group code")
+                                return@Button
+                            }
+
+                            viewModel.joinGroup(
+                                groupId = code,
+                                onSuccess = {
+                                    showToast(context, "Group Joined !")
+                                    onJoinGroup()
+                                },
+                                onFailure = {
+                                    showToast(context, it.message ?: "Joining Group Failed.")
+                                })
+
                         },
                     ) {
                         Text(stringResource(id = R.string.join_group_label))
@@ -117,8 +140,24 @@ fun JoinGroupScreen(
 
                     Button(
                         onClick = {
-                            //TODO: Create the group
-                            onCreateGroup()
+                            val groupName = groupname.text.trim() as String //to be used in viewmodel
+
+                            if (groupName.isBlank()) {
+                                showToast(context, "Enter a valid group name")
+                                return@Button
+                            }
+                            viewModel.createGroup(
+                                name = groupName,
+                                onSuccess = {
+                                    showToast(context, "Group created successfully")
+                                    onCreateGroup()
+                                },
+                                onFailure = {
+                                    showToast(context, it.message ?:"Failed to create group")
+
+                                }
+
+                            )
                         },
                     ) {
                         Text(stringResource(id = R.string.create_group_label))
