@@ -1,29 +1,37 @@
 package com.cs407.sharedspace.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush // Needed for Gradient
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs407.sharedspace.data.GroceryItemDoc
 import com.cs407.sharedspace.data.GroupGroceryViewModel
+import com.cs407.sharedspace.ui.theme.PurpleGradientTop
+import com.cs407.sharedspace.ui.theme.PurplePrimary
+
+val CardBackground = Color(0xFFF8F8F8)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroceryScreen(
     groupId: String,
-    viewModel: GroupGroceryViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: GroupGroceryViewModel = viewModel(),
     onBack: () -> Unit
 ) {
     // Begin listening when the screen is shown
@@ -51,12 +59,13 @@ fun GroceryScreen(
                 title = {
                     Text(
                         text = "Grocery",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -68,9 +77,9 @@ fun GroceryScreen(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            // "To Buy" Section
+            // ---TO BUY---
             SectionCard(
-                modifier = Modifier.weight(1f), // Takes top half of screen
+                modifier = Modifier.weight(1f),
                 title = "To Buy",
                 items = toBuy,
                 onAdd = { addingSection = "toBuy"; showAddDialog = true },
@@ -82,9 +91,9 @@ fun GroceryScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            // "Inventory" Section
+            // ---INVENTORY---
             SectionCard(
-                modifier = Modifier.weight(1f), // Takes bottom half of screen
+                modifier = Modifier.weight(1f),
                 title = "Inventory",
                 items = inventory,
                 onAdd = { addingSection = "inventory"; showAddDialog = true },
@@ -107,7 +116,7 @@ fun GroceryScreen(
     }
 }
 
-// Data models
+// Data model for UI
 data class GroceryItem(
     val name: String,
     val quantity: Int
@@ -125,8 +134,8 @@ private fun SectionCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8F8)), // Dashboard Grey
-        shape = RoundedCornerShape(16.dp), // Dashboard Rounded Corners
+        colors = CardDefaults.cardColors(containerColor = CardBackground),
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -141,15 +150,29 @@ private fun SectionCard(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
-                IconButton(onClick = onAdd) {
+
+                // Add button
+                Box(
+                    modifier = Modifier
+                        .size(40.dp) // Size of the button
+                        .clip(RoundedCornerShape(12.dp)) // Rounded corners matching dashboard theme
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(PurpleGradientTop, PurplePrimary)
+                            )
+                        )
+                        .clickable { onAdd() },
+                    contentAlignment = Alignment.Center
+                ) {
                     Icon(
-                        Icons.Default.Add,
-                        contentDescription = "Add",
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add Item",
+                        tint = Color.White
                     )
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // List Content
             if (items.isEmpty()) {
@@ -160,7 +183,6 @@ private fun SectionCard(
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(items) { doc ->
                         GroceryItemRow(
-                            // Map the Doc to the UI model
                             item = GroceryItem(name = doc.name, quantity = doc.quantity.toInt()),
                             onQuantityChange = { newQty -> onQtyChange(doc, newQty) },
                             onDelete = { onDelete(doc) }
@@ -194,13 +216,16 @@ fun GroceryItemRow(
         )
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextField(
+            // Small Quantity Field
+            OutlinedTextField(
                 value = qty,
                 onValueChange = {
                     qty = it
                     it.toIntOrNull()?.let { q -> onQuantityChange(q) }
                 },
-                modifier = Modifier.width(60.dp),
+                modifier = Modifier
+                    .width(60.dp)
+                    .height(50.dp),
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
