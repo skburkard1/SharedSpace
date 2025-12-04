@@ -70,11 +70,11 @@ fun AppNavigation() {
                 viewModel = viewModel
             )
         }
-        composable("grocery") {
-            GroceryScreen(
-                onBack = { navController.navigate("dashboard") }
-            )
+        composable("grocery/{groupId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: return@composable
+            GroceryScreen(groupId = groupId, onBack = { navController.navigate("dashboard") })
         }
+
         composable("chore") {
             ChoreScreen(
                 onBack = { navController.navigate("dashboard") }
