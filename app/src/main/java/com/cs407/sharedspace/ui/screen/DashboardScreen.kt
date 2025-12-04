@@ -24,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -31,11 +32,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,6 +98,8 @@ fun DashboardScreen(
         //DashboardItem("Map", R.drawable.ic_map, "map"),
     )
 
+    var showSignOutDialog by remember { mutableStateOf(false)}
+
     LaunchedEffect(true) {
         viewModel.loadUserData()
     }
@@ -112,7 +118,7 @@ fun DashboardScreen(
     val allChores by choreViewModel.chores.collectAsState()
     val myChores = remember(allChores, currentUserId) {
         allChores.filter {
-            // Show only chores assigned to ME that are NOT done
+            // Show only UNDONE chores assigned to user
             it.assignedToId == currentUserId && !it.isDone
         }
     }
@@ -140,8 +146,7 @@ fun DashboardScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            IconButton(onClick = onSignOut) {
-                //TODO: Add additional sign out pop up
+            IconButton(onClick = { showSignOutDialog = true }) {
                 Icon(Icons.AutoMirrored.Outlined.Logout, "Sign out")
             }
 
@@ -151,7 +156,7 @@ fun DashboardScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp),
+                .height(180.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8F8)),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(4.dp)
@@ -314,7 +319,8 @@ fun DashboardScreen(
                                 .clickable {
                                     if (item.title == "Grocery" || item.title == "Chore") {
                                         if (currentGroupId != null) {
-                                            val baseRoute = if(item.title == "Grocery") "grocery" else "chore"
+                                            val baseRoute =
+                                                if (item.title == "Grocery") "grocery" else "chore"
                                             onNavigate("$baseRoute/$currentGroupId")
                                         } else {
                                             onNavigate("myGroups")
@@ -347,5 +353,27 @@ fun DashboardScreen(
                 }
             }
         }
+    }
+    if (showSignOutDialog) {
+        AlertDialog(
+            onDismissRequest = { showSignOutDialog = false },
+            title = { Text("Sign Out") },
+            text = { Text("Are you sure you want to sign out?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSignOutDialog = false
+                        onSignOut()
+                    }
+                ) {
+                    Text("Sign Out")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSignOutDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
