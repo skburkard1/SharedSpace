@@ -11,17 +11,35 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.cs407.sharedspace.data.GroceryItemDoc
+import com.cs407.sharedspace.data.GroupGroceryViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroceryScreen(
+    groupId: String,
+    viewModel: GroupGroceryViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onBack: () -> Unit
 ) {
-    var toBuyItems by remember { mutableStateOf(mutableListOf<GroceryItem>()) }
-    var inventoryItems by remember { mutableStateOf(mutableListOf<GroceryItem>()) }
+    // Begin listening when the screen is shown
+    LaunchedEffect(groupId) {
+        if (groupId.isNotBlank()) {
+            viewModel.listenToGroupGrocery(groupId)
+        }
+    }
+
+    // Stop Firestore listener when leaving screen
+    DisposableEffect(Unit) {
+        onDispose { viewModel.stopListening() }
+    }
+
+    val allItems by viewModel.items.collectAsState()
+    val toBuy = remember(allItems) { allItems.filter { it.section == "toBuy" } }
+    val inventory = remember(allItems) { allItems.filter { it.section == "inventory" } }
 
     var showAddDialog by remember { mutableStateOf(false) }
-    var addingToSection by remember { mutableStateOf(GrocerySection.TO_BUY) }
+    var addingSection by remember { mutableStateOf("toBuy") }
 
     Scaffold(
         topBar = {
@@ -41,72 +59,40 @@ fun GroceryScreen(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-
-            // TO BUY
-            GrocerySectionCard(
+            SectionCard(
                 title = "To Buy",
-                items = toBuyItems,
-                onAddClick = {
-                    addingToSection = GrocerySection.TO_BUY
-                    showAddDialog = true
+                items = toBuy,
+                onAdd = { addingSection = "toBuy"; showAddDialog = true },
+                onQtyChange = { item, newQty ->
+                    viewModel.updateItem(groupId, item.id, qty = newQty.toLong())
                 },
-                onQuantityChange = { item, newQty ->
-                    val index = toBuyItems.indexOf(item)
-                    if (index >= 0) {
-                        toBuyItems[index] = item.copy(quantity = newQty)
-                        toBuyItems = toBuyItems.toMutableList()
-                    }
-                },
-                onRemove = { item ->
-                    toBuyItems.remove(item)
-                    toBuyItems = toBuyItems.toMutableList()
-                }
+                onDelete = { item -> viewModel.deleteItem(groupId, item.id) }
             )
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // INVENTORY
-            GrocerySectionCard(
+            SectionCard(
                 title = "Inventory",
-                items = inventoryItems,
-                onAddClick = {
-                    addingToSection = GrocerySection.INVENTORY
-                    showAddDialog = true
+                items = inventory,
+                onAdd = { addingSection = "inventory"; showAddDialog = true },
+                onQtyChange = { item, newQty ->
+                    viewModel.updateItem(groupId, item.id, qty = newQty.toLong())
                 },
-                onQuantityChange = { item, newQty ->
-                    val index = inventoryItems.indexOf(item)
-                    if (index >= 0) {
-                        inventoryItems[index] = item.copy(quantity = newQty)
-                        inventoryItems = inventoryItems.toMutableList()
-                    }
-                },
-                onRemove = { item ->
-                    inventoryItems.remove(item)
-                    inventoryItems = inventoryItems.toMutableList()
-                }
+                onDelete = { item -> viewModel.deleteItem(groupId, item.id) }
             )
         }
     }
 
-    // Add item popup
     if (showAddDialog) {
         AddItemDialog(
             onCancel = { showAddDialog = false },
             onConfirm = { name, qty ->
-                val newItem = GroceryItem(name, qty)
-                if (addingToSection == GrocerySection.TO_BUY) {
-                    toBuyItems.add(newItem)
-                    toBuyItems = toBuyItems.toMutableList()
-                } else {
-                    inventoryItems.add(newItem)
-                    inventoryItems = inventoryItems.toMutableList()
-                }
+                viewModel.addItem(groupId, name, qty.toLong(), addingSection)
                 showAddDialog = false
             }
         )
     }
 }
-
 
 // Data models
 
@@ -115,53 +101,43 @@ data class GroceryItem(
     val quantity: Int
 )
 
-enum class GrocerySection { TO_BUY, INVENTORY }
-
-
 // Reusable UI components
-
 @Composable
-fun GrocerySectionCard(
+private fun SectionCard(
     title: String,
-    items: List<GroceryItem>,
-    onAddClick: () -> Unit,
-    onQuantityChange: (GroceryItem, Int) -> Unit,
-    onRemove: (GroceryItem) -> Unit
+    items: List<GroceryItemDoc>,
+    onAdd: () -> Unit,
+    onQtyChange: (GroceryItemDoc, Int) -> Unit,
+    onDelete: (GroceryItemDoc) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
+    Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(4.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-
             Row(
-                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(title, style = MaterialTheme.typography.titleLarge)
-                Button(onClick = onAddClick) { Text("Add") }
+                Button(onClick = onAdd) { Text("Add") }
             }
-
             Spacer(Modifier.height(12.dp))
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            ) {
-                items(items) { item ->
-                    GroceryItemRow(
-                        item = item,
-                        onQuantityChange = { newQty -> onQuantityChange(item, newQty) },
-                        onDelete = { onRemove(item) }
-                    )
+            if (items.isEmpty()) {
+                Text("No items", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else {
+                LazyColumn {
+                    items(items) { doc ->
+                        GroceryItemRow(
+                            // Map the Doc to the UI model
+                            item = GroceryItem(name = doc.name, quantity = doc.quantity.toInt()),
+                            onQuantityChange = { newQty -> onQtyChange(doc, newQty) },
+                            onDelete = { onDelete(doc) }
+                        )
+                    }
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun GroceryItemRow(

@@ -73,10 +73,11 @@ fun DashboardScreen(
     )
 
     LaunchedEffect(true) {
-        viewModel.loadUserName()
+        viewModel.loadUserData()
     }
 
     val name = viewModel.userName
+    val currentGroupId = viewModel.currentGroupId
 
     Column(
         modifier = Modifier
@@ -191,7 +192,18 @@ fun DashboardScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .padding(end = 16.dp)
-                        .clickable { onNavigate(item.route) }
+                        .clickable {
+                            if (item.title == "Grocery") {
+                                if (currentGroupId != null) {
+                                    onNavigate("grocery/$currentGroupId")
+                                } else {
+                                    onNavigate("myGroups") // Redirect to join a group
+                                }
+                            } else {
+                                // Standard navigation for others
+                                onNavigate(item.route)
+                            }
+                        }
                 ) {
                     Card(
                         shape = RoundedCornerShape(16.dp),

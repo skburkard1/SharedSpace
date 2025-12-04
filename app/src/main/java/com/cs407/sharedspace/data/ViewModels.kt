@@ -7,9 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,10 +45,14 @@ class UserViewModel : ViewModel() {
             }
         }
     }
+
     var userName by mutableStateOf("")
         private set
 
-    fun loadUserName() {
+    var currentGroupId: String? = null
+        private set
+
+    fun loadUserData() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val db = FirebaseFirestore.getInstance()
 
@@ -55,12 +61,14 @@ class UserViewModel : ViewModel() {
             .get()
             .addOnSuccessListener { doc ->
                 userName = doc.getString("name") ?: ""
+
+                val groups = doc.get("groups") as? List<String>
+                currentGroupId = groups?.firstOrNull()
+
+                Log.d("UserViewModel", "Loaded group ID: $currentGroupId")
             }
             .addOnFailureListener {
                 Log.e("Firestore", "Failed to load user name", it)
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "Failed to save user name", e)
             }
     }
 
@@ -81,6 +89,7 @@ class UserViewModel : ViewModel() {
             .set(data)
             .addOnSuccessListener { onComplete() }
     }
+
     fun setUser(state: UserState) {
         _userState.update {
             state
@@ -91,6 +100,15 @@ class UserViewModel : ViewModel() {
 /**
  * for creating/joining group
  */
+class SharedGroupViewModel : ViewModel() {
+    var currentGroupId by mutableStateOf<String?>(null)
+        private set
+
+    fun updateGroup(groupId: String) {
+        currentGroupId = groupId
+    }
+}
+
 class GroupViewModel : ViewModel() {
     private val db: FirebaseFirestore = Firebase.firestore
     private val auth: FirebaseAuth = Firebase.auth
@@ -100,7 +118,7 @@ class GroupViewModel : ViewModel() {
         name: String,
         onSuccess: (String) -> Unit,
         onFailure: (Exception) -> Unit
-    ){
+    ) {
 
         val uid = auth.currentUser?.uid ?: return //uid or return if null
         val newDoc = db.collection("groups").document()
@@ -149,7 +167,7 @@ class GroupViewModel : ViewModel() {
                     .set(
                         mapOf("groups" to listOf(groupId)),
                         com.google.firebase.firestore.SetOptions.merge()
-                    )                        .await()
+                    ).await()
                 onSuccess(groupId) //successfully added
             } catch (e: Exception) {
                 onFailure(e)
@@ -159,12 +177,20 @@ class GroupViewModel : ViewModel() {
 
     }
 }
+
 class GroupListViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = Firebase.auth
 
     private val _groups = MutableStateFlow<List<Group>>(emptyList())
     val groups = _groups.asStateFlow()
+
+    var currentGroupId by mutableStateOf<String?>(null)
+        private set
+
+    fun selectGroup(groupId: String) {
+        currentGroupId = groupId
+    }
 
     fun loadUserGroups() { //get all groupsuser is in
         val uid = auth.currentUser?.uid ?: return
@@ -189,6 +215,113 @@ class GroupListViewModel : ViewModel() {
     }
 }
 
+/**
+ * for adding groceries
+ */
+data class GroceryItemDoc(
+    val id: String = "",
+    val name: String = "",
+    val quantity: Long = 0L,
+    val section: String = "toBuy",
+    val addedBy: String = "",
+    val updatedAt: Timestamp? = null
+)
+
+class GroupGroceryViewModel : ViewModel() {
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    private val _items = MutableStateFlow<List<GroceryItemDoc>>(emptyList())
+    val items = _items.asStateFlow()
+
+    private var groceryListener: ListenerRegistration? = null
+
+    /**
+     * Start listening to grocery items for a group (realtime)
+     * Call this when the screen for `groupId` is shown.
+     */
+    fun listenToGroupGrocery(groupId: String) {
+        groceryListener?.remove()
+        groceryListener = db.collection("groups")
+            .document(groupId)
+            .collection("grocery")
+            .orderBy("updatedAt")
+            .addSnapshotListener { snap, err ->
+                if (err != null) {
+                    Log.e("GroceryVM", "listener error", err)
+                    return@addSnapshotListener
+                }
+                val list = snap?.documents?.map { doc ->
+                    GroceryItemDoc(
+                        id = doc.id,
+                        name = doc.getString("name") ?: "",
+                        quantity = doc.getLong("quantity") ?: 0L,
+                        section = doc.getString("section") ?: "toBuy",
+                        addedBy = doc.getString("addedBy") ?: "",
+                        updatedAt = doc.getTimestamp("updatedAt")
+                    )
+                } ?: emptyList()
+                _items.value = list
+            }
+    }
+
+    fun stopListening() {
+        groceryListener?.remove()
+        groceryListener = null
+    }
+
+    /** Add item to a section ("toBuy" or "inventory") */
+    fun addItem(groupId: String, name: String, qty: Long, section: String) {
+        val uid = auth.currentUser?.uid ?: return
+        val data = mapOf(
+            "name" to name,
+            "quantity" to qty,
+            "section" to section,
+            "addedBy" to uid,
+            "updatedAt" to Timestamp.now()
+        )
+        db.collection("groups")
+            .document(groupId)
+            .collection("grocery")
+            .add(data)
+            .addOnFailureListener { Log.e("GroceryVM", "add failed", it) }
+    }
+
+    /** Move or update item quantity and/or section */
+    fun updateItem(
+        groupId: String,
+        itemId: String,
+        name: String? = null,
+        qty: Long? = null,
+        section: String? = null
+    ) {
+        val updates = mutableMapOf<String, Any>("updatedAt" to Timestamp.now())
+        name?.let { updates["name"] = it }
+        qty?.let { updates["quantity"] = it }
+        section?.let { updates["section"] = it }
+
+        db.collection("groups")
+            .document(groupId)
+            .collection("grocery")
+            .document(itemId)
+            .update(updates)
+            .addOnFailureListener { Log.e("GroceryVM", "update failed", it) }
+    }
+
+    fun deleteItem(groupId: String, itemId: String) {
+        db.collection("groups")
+            .document(groupId)
+            .collection("grocery")
+            .document(itemId)
+            .delete()
+            .addOnFailureListener { Log.e("GroceryVM", "delete failed", it) }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        groceryListener?.remove()
+    }
+}
 
 
 
