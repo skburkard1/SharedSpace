@@ -1,127 +1,279 @@
 package com.cs407.sharedspace.ui.screen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs407.sharedspace.R
-import com.cs407.sharedspace.data.Chore
-import com.cs407.sharedspace.data.ChoreImage
-import com.cs407.sharedspace.data.ChoreRepeats
+import com.cs407.sharedspace.data.ChoreItem
+import com.cs407.sharedspace.data.GroupChoreViewModel
+import com.cs407.sharedspace.data.GroupMember
 
 @Composable
-fun ChoreCard( //TODO: Replace with corresponding fields in Chore Database
-    chore: Chore,
+fun ChoreScreen(
+    groupId: String,
+    viewModel: GroupChoreViewModel = viewModel(),
+    onBack: () -> Unit
+) {
+    LaunchedEffect(groupId) {
+        viewModel.listenToGroupChores(groupId)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { viewModel.stopListening() }
+    }
+
+    val chores by viewModel.chores.collectAsState()
+    val members by viewModel.members.collectAsState()
+    var showAddDialog by remember { mutableStateOf(false) }
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Chore")
+            }
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back")
+                }
+                Text(
+                    text = "Chore",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(48.dp))
+            }
+
+            // Chore list
+            if (chores.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No chores yet! Add one using the + button.")
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    items(chores) { chore ->
+                        ChoreCard(
+                            chore = chore,
+                            onChecked = { viewModel.toggleChoreStatus(groupId, chore.id, chore.isDone) },
+                            onDelete = { viewModel.deleteChore(groupId, chore.id) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    // Add Dialog
+    if (showAddDialog) {
+        AddChoreDialog(
+            members = members,
+            onDismiss = { showAddDialog = false },
+            onConfirm = { name, member, repeat ->
+                viewModel.addChore(groupId, name, member, repeat)
+                showAddDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun ChoreCard(
+    chore: ChoreItem,
     onChecked: () -> Unit,
-    onEdit: () -> Unit
-){
+    onDelete: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 4.dp)
+            .padding(vertical = 6.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if(chore.isDone) Color(0xFFF0F0F0) else Color.White
+        )
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(4.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Row(modifier = Modifier,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                //TODO: Change Image based on Image in Database
-                Image(painterResource(chore.choreImage.id), chore.choreImage.contentDescription, modifier = Modifier.size(64.dp).padding(4.dp))
-                Column(modifier = Modifier) {
-                    Text(chore.choreName, fontWeight = FontWeight.Bold)
-                    Text(stringResource(id = R.string.chore_repeats) + " " + chore.choreRepeats.repeatName)
-                    //TODO: Check if choreAssignee id == UserId and change text accordingly
-                    Text(stringResource(id = R.string.chore_assigned_to) + " " + chore.choreAssignee)
-                }
-            }
-            Row(modifier = Modifier,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = chore.choreTicked,
-                    onCheckedChange = { onChecked }
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_chore),
+                    contentDescription = "Chore Icon",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(end = 12.dp)
                 )
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Outlined.Edit, "Edit Chore")
+
+                Column {
+                    Text(
+                        text = chore.name,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if(chore.isDone) Color.Gray else Color.Black
+                    )
+                    Text(
+                        text = "Repeats: ${chore.repeat}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "Assigned to: ${chore.assignedToName}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = chore.isDone,
+                    onCheckedChange = { onChecked() }
+                )
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, "Delete", tint = Color.Gray)
+                }
+            }
         }
     }
 }
 
 @Composable
-fun ChoreScreen(
-    onBack: () -> Unit
+fun AddChoreDialog(
+    members: List<GroupMember>,
+    onDismiss: () -> Unit,
+    onConfirm: (String, GroupMember, String) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Spacer(Modifier.height(32.dp)) // put app name closer in line with other screens
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 32.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    var name by remember { mutableStateOf("") }
+    var expandedMember by remember { mutableStateOf(false) }
+    var selectedMember by remember { mutableStateOf(members.firstOrNull()) }
 
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back")
+    var expandedRepeat by remember { mutableStateOf(false) }
+    val repeatOptions = listOf("One-time", "Daily", "Weekly", "Monthly")
+    var selectedRepeat by remember { mutableStateOf(repeatOptions[0]) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add New Chore") },
+        text = {
+            Column {
+                // Name Input
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Chore Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                // Assignee Dropdown
+                Text("Assign to:", style = MaterialTheme.typography.bodySmall)
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { expandedMember = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(selectedMember?.name ?: "Select Member")
+                    }
+                    DropdownMenu(
+                        expanded = expandedMember,
+                        onDismissRequest = { expandedMember = false }
+                    ) {
+                        members.forEach { member ->
+                            DropdownMenuItem(
+                                text = { Text(member.name) },
+                                onClick = {
+                                    selectedMember = member
+                                    expandedMember = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // Repeat Dropdown
+                Text("Frequency:", style = MaterialTheme.typography.bodySmall)
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { expandedRepeat = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(selectedRepeat)
+                    }
+                    DropdownMenu(
+                        expanded = expandedRepeat,
+                        onDismissRequest = { expandedRepeat = false }
+                    ) {
+                        repeatOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    selectedRepeat = option
+                                    expandedRepeat = false
+                                }
+                            )
+                        }
+                    }
+                }
             }
-            // App title
-            Text(
-                text = "Chore",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.width(24.dp)) // for correct spacing
-        }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Top
-        ) {
-            item {
-                //TODO: Take chores from Database
-                ChoreCard(
-                    Chore(
-                        1,
-                        "Laundry",
-                        1,
-                        "John",
-                        ChoreRepeats.TWICE_WEEKLY,
-                        ChoreImage.CLEANING,
-                        true
-                    ), {}, {})
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (name.isNotEmpty() && selectedMember != null) {
+                        onConfirm(name, selectedMember!!, selectedRepeat)
+                    }
+                },
+                enabled = name.isNotEmpty() && selectedMember != null
+            ) {
+                Text("Add")
             }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
         }
-    }
+    )
 }

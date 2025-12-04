@@ -323,5 +323,120 @@ class GroupGroceryViewModel : ViewModel() {
     }
 }
 
+/*
+ * For adding chores
+ */
+data class ChoreItem(
+    val id: String = "",
+    val name: String = "",
+    val assignedToName: String = "", // Storing name for simplicity in UI
+    val assignedToId: String = "",
+    val repeat: String = "Weekly",   // e.g. "Daily", "Weekly"
+    val isDone: Boolean = false,
+    val type: String = "cleaning",   // cleaning, trash, laundry, etc.
+    val updatedAt: Timestamp? = null
+)
+
+data class GroupMember(
+    val uid: String,
+    val name: String
+)
+
+class GroupChoreViewModel : ViewModel() {
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    private val _chores = MutableStateFlow<List<ChoreItem>>(emptyList())
+    val chores = _chores.asStateFlow()
+
+    private val _members = MutableStateFlow<List<GroupMember>>(emptyList())
+    val members = _members.asStateFlow()
+
+    private var choreListener: ListenerRegistration? = null
+
+    /** Listen to Chores Collection */
+    fun listenToGroupChores(groupId: String) {
+        choreListener?.remove()
+        choreListener = db.collection("groups")
+            .document(groupId)
+            .collection("chores")
+            .orderBy("updatedAt") // or order by isDone
+            .addSnapshotListener { snap, err ->
+                if (err != null) {
+                    Log.e("ChoreVM", "listener error", err)
+                    return@addSnapshotListener
+                }
+                val list = snap?.documents?.map { doc ->
+                    ChoreItem(
+                        id = doc.id,
+                        name = doc.getString("name") ?: "",
+                        assignedToName = doc.getString("assignedToName") ?: "Unassigned",
+                        assignedToId = doc.getString("assignedToId") ?: "",
+                        repeat = doc.getString("repeat") ?: "One-time",
+                        isDone = doc.getBoolean("isDone") ?: false,
+                        type = doc.getString("type") ?: "cleaning",
+                        updatedAt = doc.getTimestamp("updatedAt")
+                    )
+                } ?: emptyList()
+                _chores.value = list
+            }
+
+        fetchGroupMembers(groupId)
+    }
+
+    private fun fetchGroupMembers(groupId: String) {
+        viewModelScope.launch {
+            try {
+                val groupDoc = db.collection("groups").document(groupId).get().await()
+                val memberIds = groupDoc.get("members") as? List<String> ?: emptyList()
+
+                if (memberIds.isNotEmpty()) {
+
+                    val usersQuery = db.collection("users")
+                        .whereIn(com.google.firebase.firestore.FieldPath.documentId(), memberIds)
+                        .get()
+                        .await()
+
+                    val loadedMembers = usersQuery.documents.map { doc ->
+                        GroupMember(
+                            uid = doc.id,
+                            name = doc.getString("name") ?: "Unknown"
+                        )
+                    }
+                    _members.value = loadedMembers
+                }
+            } catch (e: Exception) {
+                Log.e("ChoreVM", "Failed to fetch members", e)
+            }
+        }
+    }
+
+    fun addChore(groupId: String, name: String, assignee: GroupMember, repeat: String) {
+        val data = mapOf(
+            "name" to name,
+            "assignedToName" to assignee.name,
+            "assignedToId" to assignee.uid,
+            "repeat" to repeat,
+            "isDone" to false,
+            "type" to "cleaning", // can expand later
+            "updatedAt" to Timestamp.now()
+        )
+        db.collection("groups").document(groupId).collection("chores").add(data)
+    }
+
+    fun toggleChoreStatus(groupId: String, choreId: String, currentStatus: Boolean) {
+        db.collection("groups").document(groupId).collection("chores").document(choreId)
+            .update("isDone", !currentStatus)
+    }
+
+    fun deleteChore(groupId: String, choreId: String) {
+        db.collection("groups").document(groupId).collection("chores").document(choreId)
+            .delete()
+    }
+
+    fun stopListening() {
+        choreListener?.remove()
+    }
+}
 
 

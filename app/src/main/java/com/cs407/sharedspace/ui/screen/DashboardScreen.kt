@@ -81,7 +81,7 @@ fun DashboardScreen(
         DashboardItem("Grocery", R.drawable.ic_grocery, "grocery"),
         DashboardItem("Bill", R.drawable.ic_bill, "bill"),
         DashboardItem("Chore", R.drawable.ic_chore, "chore"),
-        DashboardItem("Map", R.drawable.ic_map, "map"),
+        //DashboardItem("Map", R.drawable.ic_map, "map"),
     )
 
     LaunchedEffect(true) {
@@ -225,9 +225,10 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .height(140.dp)
                                 .clickable {
-                                    if (item.title == "Grocery") {
+                                    if (item.title == "Grocery" || item.title == "Chore") {
                                         if (currentGroupId != null) {
-                                            onNavigate("grocery/$currentGroupId")
+                                            val baseRoute = if(item.title == "Grocery") "grocery" else "chore"
+                                            onNavigate("$baseRoute/$currentGroupId")
                                         } else {
                                             onNavigate("myGroups")
                                         }
