@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -84,14 +85,14 @@ fun DashboardScreen(
     onSignOut: () -> Unit
 ) {
     val chatItems = listOf(
-        ChatItem("Group", R.drawable.ic_user, "group_chat"),
+        ChatItem("Group", R.drawable.ic_group, "group_chat"),
         ChatItem("Name 1", R.drawable.ic_user, "chat_name1"),
         ChatItem("Name 2", R.drawable.ic_user, "chat_name2"),
         ChatItem("Name 3", R.drawable.ic_user, "chat_name3")
     )
 
     val dashboardItems = listOf(
-        DashboardItem("My Groups", R.drawable.ic_user, "myGroups"),
+        DashboardItem("My Groups", R.drawable.ic_group, "myGroups"),
         DashboardItem("Grocery", R.drawable.ic_grocery, "grocery"),
         DashboardItem("Bill", R.drawable.ic_bill, "bill"),
         DashboardItem("Chore", R.drawable.ic_chore, "chore"),
@@ -130,6 +131,8 @@ fun DashboardScreen(
             .padding(16.dp)
     ) {
         Spacer(Modifier.height(32.dp)) // put app name closer in line with other screens
+
+        // --- TOP BAR ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -152,7 +155,7 @@ fun DashboardScreen(
 
         }
 
-        // Overview Widget
+        // --- OVERVIEW WIDGET ---
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -172,7 +175,7 @@ fun DashboardScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Hello $name",
+                        text = "Hello $name !",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -191,7 +194,7 @@ fun DashboardScreen(
                 if (myChores.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "You're all caught up! 🌟",
+                            text = "You're all caught up 🌟",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
@@ -238,13 +241,20 @@ fun DashboardScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Chat Row
+        // --- CHAT ---
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f) // Fill remaining space
                 .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-                .background(PurplePrimary)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFFE6E0F8),
+                            PurplePrimary
+                        )
+                    )
+                )
         ) {
             Column(modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)) {
                 Text(
@@ -273,7 +283,7 @@ fun DashboardScreen(
                                     .size(70.dp)
                                     .clip(RoundedCornerShape(50))
                                     .background(Color(0xFFEDEDED))
-                                    .padding(12.dp)
+                                    .padding(10.dp)
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
@@ -288,6 +298,7 @@ fun DashboardScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // --- APPS ---
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
