@@ -93,7 +93,8 @@ fun AppNavigation() {
                 groupListViewModel = groupListViewModel,
                 onGroupSelected = { groupId ->
                     navController.navigate("group_detail/$groupId")
-                }
+                },
+                onBack = { navController.navigate("dashboard") }
             )
         }
     }
