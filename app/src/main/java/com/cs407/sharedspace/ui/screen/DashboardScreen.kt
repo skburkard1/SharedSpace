@@ -15,21 +15,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,10 +43,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs407.sharedspace.R
+import com.cs407.sharedspace.data.GroupChoreViewModel
 import com.cs407.sharedspace.data.UserViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -66,6 +75,7 @@ data class ChatItem(
 @Composable
 fun DashboardScreen(
     viewModel: UserViewModel,
+    choreViewModel: GroupChoreViewModel = viewModel(),
     onNavigate: (String) -> Unit,
     onSignOut: () -> Unit
 ) {
@@ -90,6 +100,22 @@ fun DashboardScreen(
 
     val name = viewModel.userName
     val currentGroupId = viewModel.currentGroupId
+    val currentUserId = Firebase.auth.currentUser?.uid
+
+    // get all chores within group
+    LaunchedEffect(currentGroupId) {
+        if (currentGroupId != null) {
+            choreViewModel.listenToGroupChores(currentGroupId)
+        }
+    }
+    // filter to get chores unique to user
+    val allChores by choreViewModel.chores.collectAsState()
+    val myChores = remember(allChores, currentUserId) {
+        allChores.filter {
+            // Show only chores assigned to ME that are NOT done
+            it.assignedToId == currentUserId && !it.isDone
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -121,7 +147,6 @@ fun DashboardScreen(
 
         }
 
-
         // Overview Widget
         Card(
             modifier = Modifier
@@ -131,19 +156,81 @@ fun DashboardScreen(
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(10.dp)
+                    .padding(16.dp)
             ) {
-                Text(
-                    text = "Hello $name",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Hello $name",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    if (myChores.isNotEmpty()) {
+                        Text(
+                            text = "${myChores.size} Pending",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Red
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Chore List
+                if (myChores.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "You're all caught up! 🌟",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+                } else {
+                    Text(
+                        text = "Your Chores:",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    LazyColumn {
+                        items(myChores) { chore ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                // Quick Complete Checkbox
+                                Checkbox(
+                                    checked = false,
+                                    onCheckedChange = {
+                                        // Mark as done in Firestore
+                                        if (currentGroupId != null) {
+                                            choreViewModel.toggleChoreStatus(
+                                                currentGroupId,
+                                                chore.id,
+                                                chore.isDone
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Text(
+                                    text = chore.name,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         // Chat Row
