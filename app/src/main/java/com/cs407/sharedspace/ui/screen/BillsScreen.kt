@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
@@ -28,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,7 +44,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun BillsScreen(
-    // add your parameters back if you have them, e.g.
+    onBack: () -> Unit
     // navController: NavController,
     // viewModel: SharedSpaceViewModel
 ) {
@@ -58,7 +63,6 @@ fun BillsScreen(
         modifier = Modifier.fillMaxSize()
     ) {
 
-        // ⭐ Snackbar host goes HERE
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
@@ -70,10 +74,39 @@ fun BillsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            //verticalArrangement = Arrangement.Center,
+            //horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(Modifier.height(32.dp)) // put app name closer in line with other screens
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 32.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
 
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back")
+                    }
+                    // App title
+                    Text(
+                        text = "Bill",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.width(24.dp)) // for correct spacing
+                }
+        }
+            ///
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                //TODO: Find the avatar of the person in backend Data, if didn't find, the avatar remain as default
             Image(
                 painter = painterResource(id = R.drawable.ic_user),
                 contentDescription = "Avatar",
@@ -132,6 +165,7 @@ fun BillsScreen(
                             successMessage = ""
                         }
 
+                        //TODO: if the name id not in the group, show the error message "the people is not in the group"
                         amountValue == null || amountValue <= 0.0 -> {
                             error = "Please enter a valid amount."
                             successMessage = ""
@@ -141,7 +175,7 @@ fun BillsScreen(
                             error = ""
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Successfully transferred $$amountValue to $name"
+                                    message = "Successfully sent the bill to $name"
 
                                 )
                             }
@@ -173,7 +207,6 @@ fun BillsScreen(
                 )
             }
         }
-
     }
 }
 

@@ -81,7 +81,9 @@ fun AppNavigation() {
             )
         }
         composable("bill") {
-            BillsScreen()
+            BillsScreen(
+                onBack = { navController.navigate("dashboard") }
+            )
         }
         composable("myGroups") {
             val userViewModel: UserViewModel = viewModel()

@@ -98,7 +98,7 @@ fun ChoreScreen(
             }
             // App title
             Text(
-                text = stringResource(id = R.string.app_name),
+                text = "Chore",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )

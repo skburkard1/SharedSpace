@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,13 +26,19 @@ fun GroceryScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Groceries") },
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text ="Grocery",
+                        fontWeight = FontWeight.Bold
+                    )
+                        },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
+
             )
         }
     ) { padding ->
