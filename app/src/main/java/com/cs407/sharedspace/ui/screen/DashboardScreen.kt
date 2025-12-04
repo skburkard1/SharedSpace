@@ -194,7 +194,7 @@ fun DashboardScreen(
                 if (myChores.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "You're all caught up! 🌟",
+                            text = "You're all caught up 🌟",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
