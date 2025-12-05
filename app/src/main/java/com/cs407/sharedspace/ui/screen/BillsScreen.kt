@@ -125,6 +125,7 @@ fun BillsScreen(
                     containerColor = Color(0xFFF7FCFF)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ){
+                Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = "To: $displayName   $${"%.2f".format(displayAmount)}",
                 style = MaterialTheme.typography.headlineMedium,
@@ -169,7 +170,8 @@ fun BillsScreen(
             Card(
                  shape = RoundedCornerShape(30.dp),
                  elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                 modifier = Modifier.fillMaxWidth()
+                 modifier = Modifier.width(280.dp)
+                     .align(Alignment.CenterHorizontally),
             ) {
             Button(
                 modifier = Modifier.width(280.dp)
