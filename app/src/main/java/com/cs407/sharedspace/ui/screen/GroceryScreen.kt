@@ -167,7 +167,7 @@ private fun SectionCard(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add Item",
-                        tint = Color.White
+                        tint = Color.DarkGray
                     )
                 }
             }
