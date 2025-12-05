@@ -116,10 +116,19 @@ fun BillsScreen(
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
+            Card(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 0.dp)
+                .heightIn(min = 420.dp),
+                shape = RoundedCornerShape(32.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFF7FCFF)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ){
             Text(
                 text = "To: $displayName   $${"%.2f".format(displayAmount)}",
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
 
@@ -134,7 +143,9 @@ fun BillsScreen(
                 },
                 label = { Text("To who") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.width(280.dp)
+                    .align(Alignment.CenterHorizontally),
+
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -149,13 +160,20 @@ fun BillsScreen(
                 label = { Text("Amount") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.width(280.dp)
+                    .align(Alignment.CenterHorizontally),
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            Card(
+                 shape = RoundedCornerShape(30.dp),
+                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                 modifier = Modifier.fillMaxWidth()
+            ) {
             Button(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.width(280.dp)
+                    .align(Alignment.CenterHorizontally),
                 onClick = {
                     val amountValue = amount.toDoubleOrNull()
 
@@ -188,6 +206,8 @@ fun BillsScreen(
                 }
             ) {
                 Text("Confirm")
+                }
+            }
             }
 
 
