@@ -154,8 +154,8 @@ private fun SectionCard(
                 // Add button
                 Box(
                     modifier = Modifier
-                        .size(40.dp) // Size of the button
-                        .clip(RoundedCornerShape(12.dp)) // Rounded corners matching dashboard theme
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(PurpleGradientTop, PurplePrimary)
