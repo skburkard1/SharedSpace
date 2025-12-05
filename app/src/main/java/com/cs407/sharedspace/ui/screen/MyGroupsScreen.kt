@@ -1,43 +1,35 @@
 package com.cs407.sharedspace.ui.screen
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cs407.sharedspace.data.GroupListViewModel
-import com.cs407.sharedspace.data.GroupViewModel
 import com.cs407.sharedspace.data.UserViewModel
+import com.cs407.sharedspace.ui.theme.PurpleGradientTop
+import com.cs407.sharedspace.ui.theme.PurplePrimary
 
-/**
- * show groups user is in
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyGroupsScreen(
     viewModel: UserViewModel,
     groupListViewModel: GroupListViewModel,
-    onGroupSelected: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val userState by viewModel.userState.collectAsState()
@@ -51,11 +43,17 @@ fun MyGroupsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("My Groups") },
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "My Groups",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -68,34 +66,99 @@ fun MyGroupsScreen(
                 .fillMaxSize()
         ) {
             if (groups.isEmpty()) {
-                Text(
-                    "You are not in any groups.",
-                    modifier = Modifier.padding(16.dp)
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "You are not in any groups yet.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Gray
+                    )
+                }
             } else {
-
-                groups.forEach { group ->
-                    val context = LocalContext.current
-                    var boool by remember { mutableStateOf(false) }
-                    Button(
-                        onClick = {
-
-                            if (boool) boool = false
-                            else {
-                                boool = true
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                    ) {
-                        if (!boool) {
-                            Text(group.name)
-                        } else {
-                            Text("Invite Code: ${group.groupId}")
-
-                        }
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(groups) { group ->
+                        GroupCard(
+                            groupName = group.name,
+                            groupCode = group.groupId,
+                        )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun GroupCard(
+    groupName: String,
+    groupCode: String,
+) {
+    val context = LocalContext.current
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8F8)),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Group Name
+            Text(
+                text = groupName,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Invite code: $groupCode",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Copy Code Button
+            Button(
+                onClick = {
+                    // copy code to clipboard
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText("Group Code", groupCode)
+                    clipboard.setPrimaryClip(clip)
+                    Toast.makeText(context, "Code copied to clipboard!", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                contentPadding = PaddingValues(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(PurpleGradientTop, PurplePrimary)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Copy Invite Code",
+                        color = Color.DarkGray,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
