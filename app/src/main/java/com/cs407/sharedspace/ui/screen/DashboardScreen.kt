@@ -56,13 +56,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs407.sharedspace.R
 import com.cs407.sharedspace.data.GroupChoreViewModel
 import com.cs407.sharedspace.data.UserViewModel
+import com.cs407.sharedspace.ui.theme.PurpleGradientTop
+import com.cs407.sharedspace.ui.theme.PurplePrimary
+import com.cs407.sharedspace.ui.theme.BgGray
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
-val PurplePrimary = Color(0xFFD0BCFF)
-val PurpleLight = Color(0xFFCCC2DC)
-val TextWhite = Color.White
-val BgGray = Color(0xFFF5F6FA)
 
 data class DashboardItem(
     val title: String,
@@ -250,7 +249,7 @@ fun DashboardScreen(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFFE6E0F8),
+                            PurpleGradientTop,
                             PurplePrimary
                         )
                     )
