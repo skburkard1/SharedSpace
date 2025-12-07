@@ -30,6 +30,7 @@ import com.cs407.sharedspace.ui.theme.PurplePrimary
 fun MyGroupsScreen(
     viewModel: UserViewModel,
     groupListViewModel: GroupListViewModel,
+    onGroupSelected: (Int) -> Unit,
     onBack: () -> Unit
 ) {
     val userState by viewModel.userState.collectAsState()

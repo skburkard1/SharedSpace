@@ -333,7 +333,7 @@ data class ChoreItem(
     val assignedToId: String = "",
     val repeat: String = "Weekly",   // e.g. "Daily", "Weekly"
     val isDone: Boolean = false,
-    val type: String = "cleaning",   // cleaning, trash, laundry, etc.
+    val type: String = "Cleaning",   // cleaning, trash, laundry, etc.
     val updatedAt: Timestamp? = null
 )
 
@@ -411,14 +411,14 @@ class GroupChoreViewModel : ViewModel() {
         }
     }
 
-    fun addChore(groupId: String, name: String, assignee: GroupMember, repeat: String) {
+    fun addChore(groupId: String, name: String, assignee: GroupMember, repeat: String, type: String) {
         val data = mapOf(
             "name" to name,
             "assignedToName" to assignee.name,
             "assignedToId" to assignee.uid,
             "repeat" to repeat,
             "isDone" to false,
-            "type" to "cleaning", // can expand later
+            "type" to type, // can expand later
             "updatedAt" to Timestamp.now()
         )
         db.collection("groups").document(groupId).collection("chores").add(data)

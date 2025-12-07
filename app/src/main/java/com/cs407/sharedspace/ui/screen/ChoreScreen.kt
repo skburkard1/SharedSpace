@@ -1,17 +1,13 @@
 package com.cs407.sharedspace.ui.screen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +21,18 @@ import com.cs407.sharedspace.R
 import com.cs407.sharedspace.data.ChoreItem
 import com.cs407.sharedspace.data.GroupChoreViewModel
 import com.cs407.sharedspace.data.GroupMember
+
+val iconMap = mapOf(
+    "Cleaning" to R.drawable.ic_cleaning,
+    "Dishes" to R.drawable.ic_dishes,
+    "Trash" to R.drawable.ic_trash,
+    "Laundry" to R.drawable.ic_laundry,
+    "Vacuuming" to R.drawable.ic_vacuum,
+    "Watering" to R.drawable.ic_watering,
+    "Mowing" to R.drawable.ic_mowing,
+    "Cat" to R.drawable.ic_cat,
+    "Dog" to R.drawable.ic_dog
+)
 
 @Composable
 fun ChoreScreen(
@@ -106,8 +114,8 @@ fun ChoreScreen(
         AddChoreDialog(
             members = members,
             onDismiss = { showAddDialog = false },
-            onConfirm = { name, member, repeat ->
-                viewModel.addChore(groupId, name, member, repeat)
+            onConfirm = { name, member, repeat, type ->
+                viewModel.addChore(groupId, name, member, repeat, type)
                 showAddDialog = false
             }
         )
@@ -120,6 +128,7 @@ fun ChoreCard(
     onChecked: () -> Unit,
     onDelete: () -> Unit
 ) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -138,7 +147,7 @@ fun ChoreCard(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_chore),
+                    painter = painterResource(id = if (iconMap[chore.type] != null) iconMap[chore.type]!! else R.drawable.ic_chore),
                     contentDescription = "Chore Icon",
                     modifier = Modifier
                         .size(50.dp)
@@ -182,14 +191,18 @@ fun ChoreCard(
 fun AddChoreDialog(
     members: List<GroupMember>,
     onDismiss: () -> Unit,
-    onConfirm: (String, GroupMember, String) -> Unit
+    onConfirm: (String, GroupMember, String, String) -> Unit
 ) {
+    var expandedType by remember { mutableStateOf(false) }
+    val typeOptions = listOf("Cleaning", "Dishes", "Trash", "Laundry", "Vacuuming", "Watering", "Mowing", "Dog", "Cat")
+    var selectedType by remember { mutableStateOf(typeOptions[0]) }
+
     var name by remember { mutableStateOf("") }
     var expandedMember by remember { mutableStateOf(false) }
     var selectedMember by remember { mutableStateOf(members.firstOrNull()) }
 
     var expandedRepeat by remember { mutableStateOf(false) }
-    val repeatOptions = listOf("One-time", "Daily", "Weekly", "Monthly")
+    val repeatOptions = listOf("One-time", "Daily", "Twice weekly", "Weekly", "Every two weeks", "Monthly")
     var selectedRepeat by remember { mutableStateOf(repeatOptions[0]) }
 
     AlertDialog(
@@ -197,6 +210,31 @@ fun AddChoreDialog(
         title = { Text("Add New Chore") },
         text = {
             Column {
+                // Icon Dropdown
+                Text("Icon:", style = MaterialTheme.typography.bodySmall)
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { expandedType = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(selectedType)
+                    }
+                    DropdownMenu(
+                        expanded = expandedType,
+                        onDismissRequest = { expandedType = false }
+                    ) {
+                        typeOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    selectedType = option
+                                    expandedType = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 // Name Input
                 OutlinedTextField(
                     value = name,
@@ -264,7 +302,7 @@ fun AddChoreDialog(
             Button(
                 onClick = {
                     if (name.isNotEmpty() && selectedMember != null) {
-                        onConfirm(name, selectedMember!!, selectedRepeat)
+                        onConfirm(name, selectedMember!!, selectedRepeat, selectedType)
                     }
                 },
                 enabled = name.isNotEmpty() && selectedMember != null
