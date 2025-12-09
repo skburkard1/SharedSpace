@@ -90,7 +90,7 @@ fun DashboardScreen(
     )
 
     val dashboardItems = listOf(
-        DashboardItem("My Groups", R.drawable.ic_group, "myGroups"),
+        DashboardItem("My Group", R.drawable.ic_group, "myGroup"),
         DashboardItem("Grocery", R.drawable.ic_grocery, "grocery"),
         DashboardItem("Bill", R.drawable.ic_bill, "bill"),
         DashboardItem("Chore", R.drawable.ic_chore, "chore"),
@@ -332,7 +332,7 @@ fun DashboardScreen(
                                                 if (item.title == "Grocery") "grocery" else "chore"
                                             onNavigate("$baseRoute/$currentGroupId")
                                         } else {
-                                            onNavigate("myGroups")
+                                            onNavigate("myGroup")
                                         }
                                     } else {
                                         onNavigate(item.route)

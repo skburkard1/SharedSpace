@@ -47,7 +47,7 @@ fun MyGroupsScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "My Groups",
+                        text = "My Group",
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.headlineSmall
                     )

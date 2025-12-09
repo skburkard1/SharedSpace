@@ -87,7 +87,7 @@ fun AppNavigation() {
                 onBack = { navController.navigate("dashboard") }
             )
         }
-        composable("myGroups") {
+        composable("myGroup") {
             val userViewModel: UserViewModel = viewModel()
             val groupListViewModel: GroupListViewModel = viewModel()
 
@@ -95,9 +95,6 @@ fun AppNavigation() {
             MyGroupsScreen(
                 viewModel = userViewModel,
                 groupListViewModel = groupListViewModel,
-                onGroupSelected = { groupId ->
-                    navController.navigate("group_detail/$groupId")
-                },
                 onBack = { navController.navigate("dashboard") }
             )
         }
