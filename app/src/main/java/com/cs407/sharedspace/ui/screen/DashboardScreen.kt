@@ -132,7 +132,7 @@ fun DashboardScreen(
         DashboardItem("Grocery", R.drawable.ic_grocery, "grocery"),
         DashboardItem("Bill", R.drawable.ic_bill, "bill"),
         DashboardItem("Chore", R.drawable.ic_chore, "chore"),
-        //DashboardItem("Map", R.drawable.ic_map, "map"),
+        DashboardItem("Map", R.drawable.ic_map, "map"),
     )
 
     Column(
