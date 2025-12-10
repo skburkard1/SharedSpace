@@ -54,12 +54,15 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs407.sharedspace.R
 import com.cs407.sharedspace.data.GroupChoreViewModel
+import com.cs407.sharedspace.data.GroupMember
+import com.cs407.sharedspace.data.GroupViewModel
 import com.cs407.sharedspace.data.UserViewModel
 import com.cs407.sharedspace.ui.theme.PurpleGradientTop
 import com.cs407.sharedspace.ui.theme.PurplePrimary
 import com.cs407.sharedspace.ui.theme.BgGray
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.flow.forEach
 
 
 data class DashboardItem(
@@ -75,6 +78,7 @@ data class ChatItem(
     val route: String
 )
 
+
 @Composable
 fun DashboardScreen(
     viewModel: UserViewModel,
@@ -82,12 +86,11 @@ fun DashboardScreen(
     onNavigate: (String) -> Unit,
     onSignOut: () -> Unit
 ) {
+    val groupMembers = choreViewModel.members.collectAsState()
     val chatItems = listOf(
-        ChatItem("Group", R.drawable.ic_group, "group_chat"),
-        ChatItem("Name 1", R.drawable.ic_user, "chat_name1"),
-        ChatItem("Name 2", R.drawable.ic_user, "chat_name2"),
-        ChatItem("Name 3", R.drawable.ic_user, "chat_name3")
-    )
+        //TODO: get name of group
+        ChatItem("Group", R.drawable.ic_group, "group_messages/${viewModel.currentGroupId}")
+    ).union(groupMembers.value.map { groupMember -> ChatItem(groupMember.name, R.drawable.ic_user, "direct_messages/${groupMember.uid}") })
 
     val dashboardItems = listOf(
         DashboardItem("My Groups", R.drawable.ic_group, "myGroups"),

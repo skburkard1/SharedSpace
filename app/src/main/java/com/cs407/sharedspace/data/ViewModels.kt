@@ -439,4 +439,11 @@ class GroupChoreViewModel : ViewModel() {
     }
 }
 
+data class Message(
+    val mid: String, //ID of message
+    val toUid: String,
+    val fromUid: String,
+    val message: String
+)
+
 

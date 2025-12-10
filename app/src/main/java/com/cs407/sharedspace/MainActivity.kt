@@ -10,13 +10,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cs407.sharedspace.data.GroupListViewModel
+import com.cs407.sharedspace.data.GroupViewModel
 import com.cs407.sharedspace.data.UserViewModel
 import com.cs407.sharedspace.ui.screen.BillsScreen
 import com.cs407.sharedspace.ui.screen.ChoreScreen
 import com.cs407.sharedspace.ui.screen.DashboardScreen
+import com.cs407.sharedspace.ui.screen.DirectMessageScreen
 import com.cs407.sharedspace.ui.screen.EnterNameScreen
 import com.cs407.sharedspace.ui.screen.GroceryScreen
+import com.cs407.sharedspace.ui.screen.GroupMessageScreen
 import com.cs407.sharedspace.ui.screen.JoinGroupScreen
+import com.cs407.sharedspace.ui.screen.MessageScreen
 import com.cs407.sharedspace.ui.screen.MyGroupsScreen
 import com.cs407.sharedspace.ui.screen.SignInScreen
 import com.cs407.sharedspace.ui.theme.SharedSpaceTheme
@@ -38,7 +42,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val viewModel: UserViewModel = viewModel()
+    val userViewModel: UserViewModel = viewModel()
+    val groupViewModel: GroupViewModel = viewModel()
 
     NavHost(
         navController = navController, // Controller that handles navigation
@@ -48,7 +53,7 @@ fun AppNavigation() {
             SignInScreen(
                 onSignIn = { navController.navigate("dashboard") },
                 onRegister = { navController.navigate("enter_name") },
-                viewModel = viewModel
+                viewModel = userViewModel
             )
         }
         composable("join_group") {
@@ -60,14 +65,14 @@ fun AppNavigation() {
         composable("enter_name") {
             EnterNameScreen(
                 onEnterName = { navController.navigate("join_group") },
-                viewModel = viewModel
+                viewModel = userViewModel
             )
         }
         composable("dashboard") {
             DashboardScreen(
                 onNavigate = { route -> navController.navigate(route) },
                 onSignOut = { Firebase.auth.signOut(); navController.navigate("sign_in") },
-                viewModel = viewModel
+                viewModel = userViewModel
             )
         }
         composable("grocery/{groupId}") { backStackEntry ->
@@ -88,7 +93,6 @@ fun AppNavigation() {
             )
         }
         composable("myGroups") {
-            val userViewModel: UserViewModel = viewModel()
             val groupListViewModel: GroupListViewModel = viewModel()
 
 
@@ -98,6 +102,20 @@ fun AppNavigation() {
                 onGroupSelected = { groupId ->
                     navController.navigate("group_detail/$groupId")
                 },
+                onBack = { navController.navigate("dashboard") }
+            )
+        }
+        composable("direct_messages/{otherUserId}") { backStackEntry ->
+            val otherUserId = backStackEntry.arguments?.getString("otherUserId") ?: return@composable
+            DirectMessageScreen(
+                otherUserId = otherUserId,
+                onBack = { navController.navigate("dashboard") }
+            )
+        }
+        composable("group_messages/{groupId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: return@composable
+            GroupMessageScreen(
+                groupId = groupId,
                 onBack = { navController.navigate("dashboard") }
             )
         }
