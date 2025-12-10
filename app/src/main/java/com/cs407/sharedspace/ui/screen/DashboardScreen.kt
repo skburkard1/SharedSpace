@@ -128,7 +128,7 @@ fun DashboardScreen(
     )
 
     val dashboardItems = listOf(
-        DashboardItem("My Groups", R.drawable.ic_group, "myGroups"),
+        DashboardItem("My Group", R.drawable.ic_group, "myGroup"),
         DashboardItem("Grocery", R.drawable.ic_grocery, "grocery"),
         DashboardItem("Bill", R.drawable.ic_bill, "bill"),
         DashboardItem("Chore", R.drawable.ic_chore, "chore"),
