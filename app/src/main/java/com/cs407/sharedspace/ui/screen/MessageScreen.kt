@@ -3,6 +3,7 @@ package com.cs407.sharedspace.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -78,7 +79,7 @@ fun MessageScreen(
     val messages = viewModel.messages.collectAsState()
     val groupName = viewModel.groupName.collectAsState()
     val groupMembers = viewModel.members.collectAsState()
-    val otherUserNames = viewModel.groupUserNames.collectAsState()
+    val groupUserNames = viewModel.groupUserNames.collectAsState()
 
     var newMessageText by remember { mutableStateOf("") }
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = messages.value.size + 1) //scrolls to last item by default
@@ -118,7 +119,7 @@ fun MessageScreen(
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back")
             }
             Text(
-                text = if (isGroup) groupName.value else otherUserNames.value[otherId] ?: "",
+                text = if (isGroup) groupName.value else groupUserNames.value[otherId] ?: "",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -161,7 +162,7 @@ fun MessageScreen(
         ) {
             messages.value.forEach { message ->
                 item() {
-                    MessageBubble(uid == message.fromUid, message)
+                    MessageBubble(isGroup, uid == message.fromUid, groupUserNames.value[message.fromUid] ?: "", message)
                 }
             }
         }
@@ -171,39 +172,54 @@ fun MessageScreen(
 
 @Composable
 fun MessageBubble(
+    isGroup: Boolean,
     fromThis: Boolean, //true if from this user, false if from other user
+    from: String,
     message: Message
 ){
+
     Box(
         Modifier.fillMaxWidth()
     ) {
-        Card(
+        Column(
             modifier = Modifier
                 .align(if (fromThis) Alignment.CenterEnd else Alignment.CenterStart )
-                .padding(vertical = 4.dp)
                 .requiredWidthIn(max = 300.dp),
-            shape = RoundedCornerShape(
-                topStart = 16.dp,
-                topEnd = 16.dp,
-                bottomStart = if (fromThis) 16.dp else 0.dp,
-                bottomEnd = if (fromThis) 0.dp else 16.dp
-            ),
         ) {
-            Box(modifier = Modifier
-                .background(if (fromThis)  Brush.verticalGradient(
-                    colors = listOf(
-                        PurpleGradientTop,
-                        PurplePrimary
-                    )
-                ) else Brush.verticalGradient(colors = listOf(Color.LightGray, Color.LightGray)))
-                .padding(16.dp),) {
-                Text(
-                    message.messageText,
-                    style = MaterialTheme.typography.titleLarge)
+            if (isGroup and !fromThis) {
+                Text(from,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                        .padding(top = 4.dp))
             }
+            Card(
+                modifier = Modifier
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp,
+                    bottomStart = if (fromThis) 16.dp else 0.dp,
+                    bottomEnd = if (fromThis) 0.dp else 16.dp
+                ),
+            ) {
+                Box(modifier = Modifier
+                    .background(if (fromThis)  Brush.verticalGradient(
+                        colors = listOf(
+                            PurpleGradientTop,
+                            PurplePrimary
+                        )
+                    ) else Brush.verticalGradient(colors = listOf(Color.LightGray, Color.LightGray)))
+                    .padding(16.dp),) {
+                    Text(
+                        message.messageText,
+                        style = MaterialTheme.typography.titleLarge)
+                }
 
 
+            }
         }
+
     }
 
 }
