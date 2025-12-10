@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -68,7 +69,7 @@ fun ChoreScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(32.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,7 +81,7 @@ fun ChoreScreen(
                     Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back")
                 }
                 Text(
-                    text = "Chore",
+                    text = stringResource(id = R.string.chore_label),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -90,7 +91,7 @@ fun ChoreScreen(
             // Chore list
             if (chores.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No chores yet! Add one using the + button.")
+                    Text(text = stringResource(id = R.string.no_chore_message))
                 }
             } else {
                 LazyColumn(
@@ -207,7 +208,7 @@ fun AddChoreDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add New Chore") },
+        title = { Text(text = stringResource(id = R.string.add_chore)) },
         text = {
             Column {
                 // Icon Dropdown
@@ -239,14 +240,15 @@ fun AddChoreDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Chore Name") },
+                    label = { Text(text = stringResource(id = R.string.new_chore_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(Modifier.height(16.dp))
 
                 // Assignee Dropdown
-                Text("Assign to:", style = MaterialTheme.typography.bodySmall)
+                Text(text = stringResource(id = R.string.chore_assign_to),
+                    style = MaterialTheme.typography.bodySmall)
                 Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(
                         onClick = { expandedMember = true },
@@ -273,7 +275,8 @@ fun AddChoreDialog(
                 Spacer(Modifier.height(16.dp))
 
                 // Repeat Dropdown
-                Text("Frequency:", style = MaterialTheme.typography.bodySmall)
+                Text(text = stringResource(id = R.string.chore_repeat),
+                    style = MaterialTheme.typography.bodySmall)
                 Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(
                         onClick = { expandedRepeat = true },
@@ -307,11 +310,10 @@ fun AddChoreDialog(
                 },
                 enabled = name.isNotEmpty() && selectedMember != null
             ) {
-                Text("Add")
-            }
+                Text(text = stringResource(id = R.string.add))            }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(text = stringResource(id = R.string.cancel)) }
         }
     )
 }

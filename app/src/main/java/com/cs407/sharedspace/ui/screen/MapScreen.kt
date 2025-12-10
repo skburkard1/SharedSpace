@@ -55,10 +55,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cs407.sharedspace.R
 import com.cs407.sharedspace.data.LandmarkItem
 import com.cs407.sharedspace.data.MapViewModel
 import com.cs407.sharedspace.data.UserViewModel
@@ -406,27 +408,27 @@ fun AddLandmarkDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add New Landmark") },
+        title = { Text(text = stringResource(id = R.string.add_landmark)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Location Name") },
+                    label = { Text(text = stringResource(id = R.string.new_landmark_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = desc,
                     onValueChange = { desc = it },
-                    label = { Text("Description") },
+                    label = { Text(text = stringResource(id = R.string.new_landmark_desc)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = collection,
                     onValueChange = { collection = it },
-                    label = { Text("Collection (e.g., Food)") },
+                    label = { Text(text = stringResource(id = R.string.new_landmark_collection)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -440,7 +442,7 @@ fun AddLandmarkDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(text = stringResource(id = R.string.cancel)) }
         }
     )
 }

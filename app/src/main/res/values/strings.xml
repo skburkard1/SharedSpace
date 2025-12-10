@@ -1,32 +1,65 @@
 <resources>
     <!-- GENERAL (shared across multiple screens) -->
     <string name="app_name">SharedSpace</string>
+    <string name="cancel">Cancel</string>
+    <string name="add">Add</string>
 
-    <!-- SIGN IN/REGISTER SCREENS -->
+    <!-- LOG IN/REGISTER/LOG OUT -->
     <string name="sign_in_label">Log In</string>
     <string name="register_label">Register</string>
+    <string name="sign_out_label">Sign Out</string>
+    <string name="sign_out_confirmation">Are you sure you want to sign out?</string>
+
+    <!-- CREDENTIALS -->
     <string name="email_label">Email</string>
     <string name="password_label">Password</string>
-
     <string name="invalid_password">Password should contain at least one lowercase letter, one uppercase letter, and one digit</string>
     <string name="short_password">Password is too short</string>
     <string name="empty_email">Email is empty</string>
     <string name="empty_password">Password is empty</string>
 
-    <!-- JOIN/CREATE GROUP SCREEN -->
+    <!-- JOIN/CREATE GROUP -->
     <string name="create_group_label">Create Group</string>
     <string name="join_group_label">Join Group</string>
     <string name="group_id_label">Group Id</string>
     <string name="group_name_label">Group Name</string>
 
-    <!-- ENTER NAME SCREEN -->
+    <!-- ENTER NAME -->
     <string name="welcome">Welcome!</string>
     <string name="enter_name_label">Please enter your name.</string>
     <string name="name_label">Name</string>
     <string name="next_button">Next</string>
     <string name="invalid_email">Invalid Email Format</string>
 
+    <!-- DASHBOARD -->
+    <string name="no_task_message">You\'re all caught up 🌟</string>
+    <string name="chore_overview_list">Your Chores: </string>
+    <string name="chat_widget_title">Chat</string>
+    <string name="apps_widget_title">Apps</string>
+
+    <!-- MAP APP -->
+    <string name="mygroups_label">My Groups</string>
+
     <!-- CHORE APP -->
-    <string name="chore_repeats">Repeats</string>
-    <string name="chore_assigned_to">Assigned to</string>
+    <string name="chore_label">Chore</string>
+    <string name="no_chore_message">No chores yet! Add one using the + button.</string>
+    <string name="add_chore">Add New Chore</string>
+    <string name="new_chore_name">Chore Name</string>
+    <string name="chore_repeat">Repeat</string>
+    <string name="chore_assign_to">Assign to</string>
+
+    <!-- GROCERY APP -->
+    <string name="grocery_label">Grocery</string>
+    <string name="grocery_toBuy_label">To-Buy</string>
+    <string name="grocery_inventory_label">Inventory</string>
+    <string name="add_grocery">Add Item</string>
+    <string name="new_grocery_name">Item Name</string>
+    <string name="grocery_quantity">Quantity</string>
+
+    <!-- MAP APP -->
+    <string name="add_landmark">Add New Landmark</string>
+    <string name="new_landmark_name">Location Name</string>
+    <string name="new_landmark_desc">Description</string>
+    <string name="new_landmark_collection">Collection (e.g., Food)</string>
+
 </resources>

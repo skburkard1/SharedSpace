@@ -139,7 +139,7 @@ fun DashboardScreen(
             verticalAlignment = Alignment.CenterVertically
 
         ) {
-            Spacer(modifier = Modifier.width(24.dp)) // for correct spacing
+            Spacer(modifier = Modifier.width(30.dp)) // for correct spacing
             // App title
             Text(
                 text = stringResource(id = R.string.app_name),
@@ -192,14 +192,14 @@ fun DashboardScreen(
                 if (myChores.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "You're all caught up 🌟",
+                            text = stringResource(id = R.string.no_task_message),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
                     }
                 } else {
                     Text(
-                        text = "Your Chores:",
+                        text = stringResource(id = R.string.chore_overview_list),
                         style = MaterialTheme.typography.labelMedium,
                         color = Color.Gray,
                         modifier = Modifier.padding(bottom = 4.dp)
@@ -256,7 +256,7 @@ fun DashboardScreen(
         ) {
             Column(modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)) {
                 Text(
-                    text = "Chat",
+                    text = stringResource(id = R.string.chat_widget_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -306,7 +306,7 @@ fun DashboardScreen(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "What would you like to do today?",
+                    text = stringResource(id = R.string.apps_widget_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -370,8 +370,8 @@ fun DashboardScreen(
     if (showSignOutDialog) {
         AlertDialog(
             onDismissRequest = { showSignOutDialog = false },
-            title = { Text("Sign Out") },
-            text = { Text("Are you sure you want to sign out?") },
+            title = { Text(text = stringResource(id = R.string.sign_out_label)) },
+            text = { Text(text = stringResource(id = R.string.sign_out_confirmation)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -379,12 +379,12 @@ fun DashboardScreen(
                         onSignOut()
                     }
                 ) {
-                    Text("Sign Out")
+                    Text(text = stringResource(id = R.string.sign_out_label))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showSignOutDialog = false }) {
-                    Text("Cancel")
+                    Text(text = stringResource(id = R.string.cancel))
                 }
             }
         )
