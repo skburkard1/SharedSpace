@@ -17,6 +17,7 @@ import com.cs407.sharedspace.ui.screen.DashboardScreen
 import com.cs407.sharedspace.ui.screen.EnterNameScreen
 import com.cs407.sharedspace.ui.screen.GroceryScreen
 import com.cs407.sharedspace.ui.screen.JoinGroupScreen
+import com.cs407.sharedspace.ui.screen.MapScreen
 import com.cs407.sharedspace.ui.screen.MyGroupsScreen
 import com.cs407.sharedspace.ui.screen.SignInScreen
 import com.cs407.sharedspace.ui.theme.SharedSpaceTheme
@@ -51,18 +52,19 @@ fun AppNavigation() {
                 viewModel = viewModel
             )
         }
+
         composable("join_group") {
             JoinGroupScreen(
                 onJoinGroup = { navController.navigate("dashboard") },
-                onCreateGroup = { navController.navigate("dashboard") }
-            )
+                onCreateGroup = { navController.navigate("dashboard") })
         }
+
         composable("enter_name") {
             EnterNameScreen(
-                onEnterName = { navController.navigate("join_group") },
-                viewModel = viewModel
+                onEnterName = { navController.navigate("join_group") }, viewModel = viewModel
             )
         }
+
         composable("dashboard") {
             DashboardScreen(
                 onNavigate = { route -> navController.navigate(route) },
@@ -70,33 +72,39 @@ fun AppNavigation() {
                 viewModel = viewModel
             )
         }
+
+        composable("myGroup") {
+            val userViewModel: UserViewModel = viewModel()
+            val groupListViewModel: GroupListViewModel = viewModel()
+
+            MyGroupsScreen(
+                viewModel = userViewModel,
+                groupListViewModel = groupListViewModel,
+                onBack = { navController.navigate("dashboard") })
+        }
+
         composable("grocery/{groupId}") { backStackEntry ->
             val groupId = backStackEntry.arguments?.getString("groupId") ?: return@composable
             GroceryScreen(groupId = groupId, onBack = { navController.navigate("dashboard") })
         }
 
+        composable("bill") {
+            BillsScreen(
+                onBack = { navController.navigate("dashboard") })
+        }
+
         composable("chore/{groupId}") { backStackEntry ->
             val groupId = backStackEntry.arguments?.getString("groupId") ?: return@composable
             ChoreScreen(
+                groupId = groupId, onBack = { navController.navigate("dashboard") })
+        }
+
+        composable("map/{groupId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: return@composable
+            MapScreen(
                 groupId = groupId,
-                onBack = { navController.navigate("dashboard") }
-            )
-        }
-        composable("bill") {
-            BillsScreen(
-                onBack = { navController.navigate("dashboard") }
-            )
-        }
-        composable("myGroup") {
-            val userViewModel: UserViewModel = viewModel()
-            val groupListViewModel: GroupListViewModel = viewModel()
-
-
-            MyGroupsScreen(
-                viewModel = userViewModel,
-                groupListViewModel = groupListViewModel,
-                onBack = { navController.navigate("dashboard") }
-            )
+                userViewModel = viewModel,
+                onBack = { navController.popBackStack() })
         }
     }
 }

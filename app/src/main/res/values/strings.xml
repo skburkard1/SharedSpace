@@ -1,22 +1,32 @@
 <resources>
+    <!-- GENERAL (shared across multiple screens) -->
     <string name="app_name">SharedSpace</string>
+
+    <!-- SIGN IN/REGISTER SCREENS -->
     <string name="sign_in_label">Log In</string>
     <string name="register_label">Register</string>
     <string name="email_label">Email</string>
     <string name="password_label">Password</string>
-    <string name="create_group_label">Create Group</string>
-    <string name="join_group_label">Join Group</string>
-    <string name="group_id_label">Group Id</string>
-    <string name="welcome">Welcome!</string>
-    <string name="enter_name_label">Please enter your name.</string>
-    <string name="name_label">Name</string>
-    <string name="group_name_label">Group Name</string>
-    <string name="next_button">Next</string>
-    <string name="invalid_email">Invalid Email Format</string>
+
     <string name="invalid_password">Password should contain at least one lowercase letter, one uppercase letter, and one digit</string>
     <string name="short_password">Password is too short</string>
     <string name="empty_email">Email is empty</string>
     <string name="empty_password">Password is empty</string>
+
+    <!-- JOIN/CREATE GROUP SCREEN -->
+    <string name="create_group_label">Create Group</string>
+    <string name="join_group_label">Join Group</string>
+    <string name="group_id_label">Group Id</string>
+    <string name="group_name_label">Group Name</string>
+
+    <!-- ENTER NAME SCREEN -->
+    <string name="welcome">Welcome!</string>
+    <string name="enter_name_label">Please enter your name.</string>
+    <string name="name_label">Name</string>
+    <string name="next_button">Next</string>
+    <string name="invalid_email">Invalid Email Format</string>
+
+    <!-- CHORE APP -->
     <string name="chore_repeats">Repeats</string>
     <string name="chore_assigned_to">Assigned to</string>
 </resources>

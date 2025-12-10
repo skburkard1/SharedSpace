@@ -411,7 +411,13 @@ class GroupChoreViewModel : ViewModel() {
         }
     }
 
-    fun addChore(groupId: String, name: String, assignee: GroupMember, repeat: String, type: String) {
+    fun addChore(
+        groupId: String,
+        name: String,
+        assignee: GroupMember,
+        repeat: String,
+        type: String
+    ) {
         val data = mapOf(
             "name" to name,
             "assignedToName" to assignee.name,
@@ -439,4 +445,64 @@ class GroupChoreViewModel : ViewModel() {
     }
 }
 
+/*
+ * Map
+ */
+data class LandmarkItem(
+    val id: String = "",
+    val name: String = "",
+    val description: String = "",
+    val collection: String = "General",
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val addedByUid: String = "",
+    val addedByName: String = ""
+)
+
+class MapViewModel : ViewModel() {
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    private val _landmarks = MutableStateFlow<List<LandmarkItem>>(emptyList())
+    val landmarks = _landmarks.asStateFlow()
+
+    private var listener: ListenerRegistration? = null
+
+    fun listenToLandmarks(groupId: String) {
+        listener?.remove()
+        listener = db.collection("groups").document(groupId)
+            .collection("landmarks")
+            .addSnapshotListener { snap, _ ->
+                if (snap != null) {
+                    _landmarks.value = snap.documents.map { doc ->
+                        doc.toObject(LandmarkItem::class.java)?.copy(id = doc.id) ?: LandmarkItem()
+                    }
+                }
+            }
+    }
+
+    fun addLandmark(groupId: String, landmark: LandmarkItem) {
+        val uid = auth.currentUser?.uid ?: return
+        db.collection("groups").document(groupId)
+            .collection("landmarks")
+            .add(landmark.copy(addedByUid = uid))
+    }
+
+    fun deleteLandmark(groupId: String, landmarkId: String) {
+        db.collection("groups").document(groupId)
+            .collection("landmarks").document(landmarkId).delete()
+    }
+
+    // Helper to generate a unique landmark marker color based on User ID
+    fun getMarkerHue(uid: String): Float {
+        val hash = uid.hashCode()
+        val hue = (kotlin.math.abs(hash) % 360).toFloat()
+        return hue
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        listener?.remove()
+    }
+}
 

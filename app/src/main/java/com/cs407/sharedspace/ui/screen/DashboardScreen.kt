@@ -55,9 +55,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs407.sharedspace.R
 import com.cs407.sharedspace.data.GroupChoreViewModel
 import com.cs407.sharedspace.data.UserViewModel
+import com.cs407.sharedspace.ui.theme.BgGray
 import com.cs407.sharedspace.ui.theme.PurpleGradientTop
 import com.cs407.sharedspace.ui.theme.PurplePrimary
-import com.cs407.sharedspace.ui.theme.BgGray
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -94,10 +94,10 @@ fun DashboardScreen(
         DashboardItem("Grocery", R.drawable.ic_grocery, "grocery"),
         DashboardItem("Bill", R.drawable.ic_bill, "bill"),
         DashboardItem("Chore", R.drawable.ic_chore, "chore"),
-        //DashboardItem("Map", R.drawable.ic_map, "map"),
+        DashboardItem("Map", R.drawable.ic_map, "map"),
     )
 
-    var showSignOutDialog by remember { mutableStateOf(false)}
+    var showSignOutDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(true) {
         viewModel.loadUserData()
@@ -134,7 +134,7 @@ fun DashboardScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp),
+                .padding(bottom = 30.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
 
@@ -326,10 +326,14 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .height(140.dp)
                                 .clickable {
-                                    if (item.title == "Grocery" || item.title == "Chore") {
+                                    if (item.title == "Grocery" || item.title == "Chore" || item.title == "Map") {
                                         if (currentGroupId != null) {
-                                            val baseRoute =
-                                                if (item.title == "Grocery") "grocery" else "chore"
+                                            val baseRoute = when (item.title) {
+                                                "Grocery" -> "grocery"
+                                                "Chore" -> "chore"
+                                                "Map" -> "map"
+                                                else -> item.route
+                                            }
                                             onNavigate("$baseRoute/$currentGroupId")
                                         } else {
                                             onNavigate("myGroup")
