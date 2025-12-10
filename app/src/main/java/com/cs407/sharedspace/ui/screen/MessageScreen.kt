@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -65,13 +66,13 @@ fun DirectMessageScreen(
             Message("2", "", uid, "This is a test~!"),
             Message("3", "", uid, "a\nb\nc\nd\ne\naksldfjklakdjfalskdjflsakdjflkajsldfjsaalsdkfjasldkfjasldkjfasldjflakjdfljsdlksajdlfkjasdljsalfkdjsaldfkjasldkjasldkfjaslkdfjasld"),
             Message("4", "", uid, "SCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL")
+            Message("5", "", uid, "SCROLLSCROLL"),
+            Message("6", "", uid, "SCROLLSCROLL"),
+            Message("7", "", uid, "SCROLLSCROLL"),
+            Message("8", "", uid, "SCROLLSCROLL"),
+            Message("9", "", uid, "SCROLLSCROLL"),
+            Message("10", "", uid, "SCROLLSCROLL"),
+            Message("11", "", uid, "SCROLLSCROLL")
         )
     }
 
@@ -98,13 +99,13 @@ fun GroupMessageScreen(
             Message("2", "", uid, "This is a test~!"),
             Message("3", "", uid, "a\nb\nc\nd\ne\naksldfjklakdjfalskdjflsakdjflkajsldfjsaalsdkfjasldkfjasldkjfasldjflakjdfljsdlksajdlfkjasdljsalfkdjsaldfkjasldkjasldkfjaslkdfjasld"),
             Message("4", "", uid, "SCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL"),
-            Message("4", "", uid, "SCROLLSCROLL")
+            Message("5", "", uid, "SCROLLSCROLL"),
+            Message("6", "", uid, "SCROLLSCROLL"),
+            Message("7", "", uid, "SCROLLSCROLL"),
+            Message("8", "", uid, "SCROLLSCROLL"),
+            Message("9", "", uid, "SCROLLSCROLL"),
+            Message("10", "", uid, "SCROLLSCROLL"),
+            Message("11", "", uid, "SCROLLSCROLL")
         )
     }
 
@@ -125,6 +126,7 @@ fun MessageScreen(
 
     //TODO: Consider adding real time check for new messages. Or message notifications?
     var newMessageText by remember { mutableStateOf("") }
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = messages.size) //scrolls to last item by default
 
     Scaffold(
         topBar = {
@@ -168,13 +170,14 @@ fun MessageScreen(
         }
     ) { innerPadding ->
         LazyColumn(
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
+            state = listState
         ) {
             messages.forEach { message ->
-                item {
+                item(message.mid) {
                     MessageBubble(uid == message.fromUid, message.message)
                 }
             }
