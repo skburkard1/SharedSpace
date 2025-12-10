@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,6 +37,8 @@ fun EnterNameScreen(
     viewModel: UserViewModel,
     onEnterName: () -> Unit
 ) {
+    val context = LocalContext.current
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.Transparent
@@ -82,7 +85,13 @@ fun EnterNameScreen(
 
                     Button(
                         onClick = {
-                            viewModel.saveUserName(name.text.toString()) {
+                            val userName: String = name.text.toString().trim()
+
+                            if (userName.isBlank()) {
+                                showToast(context, "Enter a valid name")
+                                return@Button
+                            }
+                            viewModel.saveUserName(name = userName) {
                                 onEnterName()
                             }
                         },

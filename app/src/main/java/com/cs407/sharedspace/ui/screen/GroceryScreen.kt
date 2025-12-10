@@ -15,11 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush // Needed for Gradient
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cs407.sharedspace.R
 import com.cs407.sharedspace.data.GroceryItemDoc
 import com.cs407.sharedspace.data.GroupGroceryViewModel
 import com.cs407.sharedspace.ui.theme.PurpleGradientTop
@@ -53,57 +55,58 @@ fun GroceryScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var addingSection by remember { mutableStateOf("toBuy") }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Grocery",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Column(
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
+    ) {
+        Spacer(Modifier.height(32.dp))
+        Row(
             modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
-                .fillMaxSize()
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // ---TO BUY---
-            SectionCard(
-                modifier = Modifier.weight(1f),
-                title = "To Buy",
-                items = toBuy,
-                onAdd = { addingSection = "toBuy"; showAddDialog = true },
-                onQtyChange = { item, newQty ->
-                    viewModel.updateItem(groupId, item.id, qty = newQty.toLong())
-                },
-                onDelete = { item -> viewModel.deleteItem(groupId, item.id) }
+            IconButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back")
+            }
+            Text(
+                text = stringResource(id = R.string.grocery_label),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
             )
-
-            Spacer(Modifier.height(16.dp))
-
-            // ---INVENTORY---
-            SectionCard(
-                modifier = Modifier.weight(1f),
-                title = "Inventory",
-                items = inventory,
-                onAdd = { addingSection = "inventory"; showAddDialog = true },
-                onQtyChange = { item, newQty ->
-                    viewModel.updateItem(groupId, item.id, qty = newQty.toLong())
-                },
-                onDelete = { item -> viewModel.deleteItem(groupId, item.id) }
-            )
+            Spacer(modifier = Modifier.width(48.dp))
         }
+
+        // ---TO BUY---
+        SectionCard(
+            modifier = Modifier.weight(1f),
+            title = stringResource(id = R.string.grocery_toBuy_label),
+            items = toBuy,
+            onAdd = { addingSection = "toBuy"; showAddDialog = true },
+            onQtyChange = { item, newQty ->
+                viewModel.updateItem(groupId, item.id, qty = newQty.toLong())
+            },
+            onDelete = { item -> viewModel.deleteItem(groupId, item.id) }
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        // ---INVENTORY---
+        SectionCard(
+            modifier = Modifier.weight(1f),
+            title = stringResource(id = R.string.grocery_inventory_label),
+            items = inventory,
+            onAdd = { addingSection = "inventory"; showAddDialog = true },
+            onQtyChange = { item, newQty ->
+                viewModel.updateItem(groupId, item.id, qty = newQty.toLong())
+            },
+            onDelete = { item -> viewModel.deleteItem(groupId, item.id) }
+        )
     }
+
 
     if (showAddDialog) {
         AddItemDialog(
@@ -259,20 +262,20 @@ fun AddItemDialog(
 
     AlertDialog(
         onDismissRequest = onCancel,
-        title = { Text("Add Item") },
+        title = { Text(text = stringResource(id = R.string.add_grocery)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Item name") },
+                    label = { Text(text = stringResource(id = R.string.new_grocery_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = { quantity = it },
-                    label = { Text("Quantity") },
+                    label = { Text(text = stringResource(id = R.string.grocery_quantity)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -285,11 +288,11 @@ fun AddItemDialog(
                 },
                 enabled = name.isNotBlank()
             ) {
-                Text("Add")
+                Text(text = stringResource(id = R.string.add))
             }
         },
         dismissButton = {
-            TextButton(onClick = onCancel) { Text("Cancel") }
+            TextButton(onClick = onCancel) { Text(text = stringResource(id = R.string.cancel)) }
         }
     )
 }
