@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlin.collections.plus
 
 data class UserState(
     val id: Int = 0, val name: String = "", val uid: String = ""
@@ -212,6 +213,7 @@ class GroupListViewModel : ViewModel() {
                 e.printStackTrace()
             }
         }
+
     }
 }
 
@@ -440,10 +442,130 @@ class GroupChoreViewModel : ViewModel() {
 }
 
 data class Message(
-    val mid: String, //ID of message
-    val toUid: String,
     val fromUid: String,
-    val message: String
+    val messageText: String,
+    val updatedAt: Timestamp? = null
 )
+
+class MessagesViewModel : ViewModel() {
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    private val _messages = MutableStateFlow<List<Message>>(emptyList())
+    val messages = _messages.asStateFlow()
+
+    private val _members = MutableStateFlow<List<GroupMember>>(emptyList())
+    val members = _members.asStateFlow()
+
+    private val _groupName = MutableStateFlow<String>("")
+    val groupName = _groupName.asStateFlow()
+
+    private val _groupUserNames = MutableStateFlow<Map<String, String>>(emptyMap())
+    val groupUserNames = _groupUserNames.asStateFlow()
+
+    private var messageListener: ListenerRegistration? = null
+
+    /** Listen to Messages Collection */
+    fun listenToMessages(chatId: String, groupId: String? = null, otherUid: String? = null) {
+        messageListener?.remove()
+        messageListener = db.collection("chats")
+            .document(chatId)
+            .collection("messages")
+            .orderBy("updatedAt")
+            .addSnapshotListener { snap, err ->
+                if (err != null) {
+                    Log.e("MessagesVM", "listener error", err)
+                    return@addSnapshotListener
+                }
+                val list = snap?.documents?.map { doc ->
+                    Message(
+                        fromUid = doc.getString("fromUid") ?: "",
+                        messageText = doc.getString("messageText") ?: "",
+                        updatedAt = doc.getTimestamp("updatedAt")
+                    )
+                } ?: emptyList()
+                _messages.value = list
+            }
+        if (groupId != null) {
+            fetchGroupMembers(groupId)
+        }
+
+    }
+
+    fun sendMessage(chatId: String, message: Message, onComplete: (String) -> Unit) {
+        val uid = auth.currentUser?.uid ?: return //uid or return if null
+        val data = mapOf(
+            "fromUid" to message.fromUid,
+            "messageText" to message.messageText,
+            "updatedAt" to Timestamp.now()
+        )
+
+        db.collection("chats").document(chatId)
+            .collection("messages").add(data)
+            .addOnFailureListener { result ->
+                onComplete("Failed to send message")
+                Log.e("MessageVM", "Failed to send a message")
+            }
+    }
+
+
+    private fun fetchGroupMembers(groupId: String) {
+        viewModelScope.launch {
+            try {
+                val groupDoc = db.collection("groups").document(groupId).get().await()
+                val memberIds = groupDoc.get("members") as? List<String> ?: emptyList()
+                _groupName.value = groupDoc.getString("name") ?: "Group"
+                if (memberIds.isNotEmpty()) {
+
+                    val usersQuery = db.collection("users")
+                        .whereIn(com.google.firebase.firestore.FieldPath.documentId(), memberIds)
+                        .get()
+                        .await()
+
+                    val loadedMembers = usersQuery.documents.map { doc ->
+                        GroupMember(
+                            uid = doc.id,
+                            name = doc.getString("name") ?: "Unknown"
+                        )
+                    }
+                    _members.value = loadedMembers
+                    _groupUserNames.value = emptyMap()
+                    for (member in _members.value) {
+                       _groupUserNames.value = _groupUserNames.value + mapOf(member.uid to member.name)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("MessageVM", "Failed to fetch members", e)
+            }
+        }
+    }
+
+    fun stopListening() {
+        messageListener?.remove()
+    }
+
+}
+
+class DashboardViewModel() : ViewModel() {
+    private val db = FirebaseFirestore.getInstance()
+
+    private val _groupName = MutableStateFlow<String?>(null)
+    val groupName = _groupName.asStateFlow()
+
+
+    fun fetchGroupName(groupId: String) {
+        viewModelScope.launch {
+            try {
+                val groupDoc = db.collection("groups").document(groupId).get().await()
+                val memberIds = groupDoc.get("members") as? List<String> ?: emptyList()
+                _groupName.value = groupDoc.getString("name") ?: "Group"
+
+            } catch (e: Exception) {
+                Log.e("DashboardVM", "Failed to fetch group name", e)
+            }
+        }
+    }
+
+}
 
 

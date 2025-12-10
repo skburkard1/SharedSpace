@@ -53,16 +53,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs407.sharedspace.R
+import com.cs407.sharedspace.data.DashboardViewModel
 import com.cs407.sharedspace.data.GroupChoreViewModel
-import com.cs407.sharedspace.data.GroupMember
-import com.cs407.sharedspace.data.GroupViewModel
 import com.cs407.sharedspace.data.UserViewModel
 import com.cs407.sharedspace.ui.theme.PurpleGradientTop
 import com.cs407.sharedspace.ui.theme.PurplePrimary
 import com.cs407.sharedspace.ui.theme.BgGray
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import kotlinx.coroutines.flow.forEach
 
 
 data class DashboardItem(
@@ -83,22 +81,12 @@ data class ChatItem(
 fun DashboardScreen(
     viewModel: UserViewModel,
     choreViewModel: GroupChoreViewModel = viewModel(),
+    dashboardViewModel: DashboardViewModel,
     onNavigate: (String) -> Unit,
     onSignOut: () -> Unit
 ) {
     val groupMembers = choreViewModel.members.collectAsState()
-    val chatItems = listOf(
-        //TODO: get name of group
-        ChatItem("Group", R.drawable.ic_group, "group_messages/${viewModel.currentGroupId}")
-    ).union(groupMembers.value.map { groupMember -> ChatItem(groupMember.name, R.drawable.ic_user, "direct_messages/${groupMember.uid}") })
 
-    val dashboardItems = listOf(
-        DashboardItem("My Groups", R.drawable.ic_group, "myGroups"),
-        DashboardItem("Grocery", R.drawable.ic_grocery, "grocery"),
-        DashboardItem("Bill", R.drawable.ic_bill, "bill"),
-        DashboardItem("Chore", R.drawable.ic_chore, "chore"),
-        //DashboardItem("Map", R.drawable.ic_map, "map"),
-    )
 
     var showSignOutDialog by remember { mutableStateOf(false)}
 
@@ -114,6 +102,7 @@ fun DashboardScreen(
     LaunchedEffect(currentGroupId) {
         if (currentGroupId != null) {
             choreViewModel.listenToGroupChores(currentGroupId)
+
         }
     }
     // filter to get chores unique to user
@@ -124,6 +113,29 @@ fun DashboardScreen(
             it.assignedToId == currentUserId && !it.isDone
         }
     }
+
+    LaunchedEffect(currentGroupId) {
+        if (currentGroupId != null) dashboardViewModel.fetchGroupName(currentGroupId)
+    }
+    val groupName = dashboardViewModel.groupName.collectAsState()
+
+    val chatItems = (groupMembers.value.filter { member -> member.uid != currentUserId }
+        .map { groupMember ->
+            ChatItem(
+                groupMember.name,
+                R.drawable.ic_user,
+                "direct_messages/${currentGroupId}\"/${groupMember.uid}"
+            )
+        }
+    )
+
+    val dashboardItems = listOf(
+        DashboardItem("My Groups", R.drawable.ic_group, "myGroups"),
+        DashboardItem("Grocery", R.drawable.ic_grocery, "grocery"),
+        DashboardItem("Bill", R.drawable.ic_bill, "bill"),
+        DashboardItem("Chore", R.drawable.ic_chore, "chore"),
+        //DashboardItem("Map", R.drawable.ic_map, "map"),
+    )
 
     Column(
         modifier = Modifier
@@ -270,7 +282,13 @@ fun DashboardScreen(
                         .horizontalScroll(rememberScrollState())
                         .fillMaxWidth()
                 ) {
-                    chatItems.forEach { chat ->
+                    (if (groupName.value != null){ listOf(
+                        ChatItem(
+                            groupName.value!!,
+                            R.drawable.ic_group,
+                            "group_messages/${viewModel.currentGroupId}"
+                        )) + chatItems} else chatItems
+                        ).forEach { chat : ChatItem ->
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
