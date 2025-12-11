@@ -105,9 +105,12 @@ fun AppNavigation() {
             )
         }
 
-        composable("bill") {
+        composable("bill/{groupId}") { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: return@composable
             BillsScreen(
+                groupId = groupId,
                 onBack = { navController.navigate("dashboard") }
+
             )
         }
 

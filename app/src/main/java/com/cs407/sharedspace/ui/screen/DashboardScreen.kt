@@ -345,12 +345,13 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .height(140.dp)
                                 .clickable {
-                                    if (item.title == "Grocery" || item.title == "Chore" || item.title == "Map") {
+                                    if (item.title == "Grocery" || item.title == "Chore" || item.title == "Map"||item.title == "Bill") {
                                         if (currentGroupId != null) {
                                             val baseRoute = when (item.title) {
                                                 "Grocery" -> "grocery"
                                                 "Chore" -> "chore"
                                                 "Map" -> "map"
+                                                "Bill" -> "bill"
                                                 else -> item.route
                                             }
                                             onNavigate("$baseRoute/$currentGroupId")
